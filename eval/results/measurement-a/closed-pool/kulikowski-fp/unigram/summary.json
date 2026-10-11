@@ -1,0 +1,19 @@
+{
+ "format": "coelacanth-closed-pool-summary/v1",
+ "setting": "unigram",
+ "package_commit": "ef1ebe7fe69f2550bc246d19a7728452a04ad302",
+ "papers": 109,
+ "queries": 92,
+ "pool_only": 17,
+ "pairs": 5812,
+ "twins": 210,
+ "p_at_1": 0.826087,
+ "mrr": 0.869996,
+ "ap": 0.441289,
+ "ap_unit": "cross-field pairs; pair score = mean of the two directed scores; twin = same family",
+ "checked_against_reproduction": {
+  "p_at_1": 0.826,
+  "mrr": 0.87,
+  "ap": null
+ }
+}

@@ -1,0 +1,74 @@
+{
+ "format": "coelacanth-human-decisions/v1",
+ "rows": [
+  {
+   "task": "pair label (relation and cross-field answer)",
+   "by": "annotators",
+   "n": 272,
+   "covers": "4 pairs of b01 and b02, two readings each",
+   "source": "eval/benchmark/v0/quiz/answers/a1.json, a2.json, a3.json"
+  },
+  {
+   "task": "disagreements settled",
+   "by": "author",
+   "n": 51,
+   "covers": "one-line reason each",
+   "source": "eval/benchmark/v0/quiz/adjudication/decisions-damir.json"
+  },
+  {
+   "task": "attribution of cross-field gold pairs",
+   "by": "annotators",
+   "n": 48,
+   "covers": "24 pairs, two readings each",
+   "source": "eval/benchmark/v0/checks/returned/attribution-a*.json"
+  },
+  {
+   "task": "claim-text check",
+   "by": "annotators",
+   "n": 51,
+   "covers": "51 probed items",
+   "source": "eval/benchmark/v0/checks/returned/claimcheck-a*.json"
+  },
+  {
+   "task": "pair label, batch b03 (printed sheets)",
+   "by": "annotators",
+   "n": 6,
+   "covers": "3 pairs, two readings each",
+   "source": "eval/benchmark/v0/quiz/b03/answers/a*.json"
+  },
+  {
+   "task": "works the models named closed-book",
+   "by": "annotators",
+   "n": 31,
+   "covers": "31 works on 3 items (printed sheets)",
+   "source": "eval/benchmark/v0/checks/returned/named-a1.json, named-a2.json"
+  },
+  {
+   "task": "named works rated gold",
+   "by": "author",
+   "n": 14,
+   "covers": "14 of the 31 works",
+   "source": "eval/benchmark/v0/checks/returned/named-decisions.json"
+  },
+  {
+   "task": "borderline closed-book matches",
+   "by": "people, split not recorded",
+   "n": 213,
+   "covers": "first run",
+   "source": "eval/results/closed-book-v0/borderline-decisions.json"
+  },
+  {
+   "task": "re-decision of random borderline matches",
+   "by": "author",
+   "n": 30,
+   "covers": "repeats entries of the row above",
+   "source": "eval/results/closed-book-v0/borderline-recheck.json"
+  }
+ ],
+ "by": {
+  "annotators": 408,
+  "author": 95,
+  "people, split not recorded": 213
+ },
+ "total": 716
+}

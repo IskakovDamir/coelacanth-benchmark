@@ -1,0 +1,176 @@
+{
+ "format": "coelacanth-labels/v2",
+ "batch": "practice",
+ "annotator": "key",
+ "exported_at": "2026-10-07T12:00:00.000Z",
+ "items": [
+  {
+   "id": "cf-9001",
+   "minutes": 25,
+   "claim": {
+    "text": "To determine the area under a glucose tolerance curve, or under another metabolic curve, divide the area under the plotted curve between two chosen values on the x-axis (abscissas) into small segments, rectangles and triangles, whose areas can be accurately calculated from their geometrical formulas, and add these individual areas up. The measurement times on the x-axis need not be equally spaced. Compared with the areas obtained by the graphic method, the results differ by less than 0.4%, whereas other formulas in use under- or overestimate the area by a large margin.",
+    "skeleton": "Estimate the integral of a quantity measured only at a few, possibly unevenly spaced, times by treating the stretch between each pair of neighbouring measurements as a simple straight-edged shape and adding up the areas of these shapes.",
+    "chart": [
+     {
+      "id": "e1",
+      "text": "the area under a curve known only at its measured points (values at the sampling times)",
+      "key": true
+     },
+     {
+      "id": "e2",
+      "text": "between two consecutive measurements the curve is replaced by a straight edge, so each segment is a rectangle plus a triangle",
+      "key": true
+     },
+     {
+      "id": "e3",
+      "text": "total area = sum over consecutive pairs of (x_k - x_(k-1)) * (y_(k-1) + y_k) / 2, with sampling intervals that may differ",
+      "key": true
+     },
+     {
+      "id": "e4",
+      "text": "the result is checked against the graphic method (within 0.4%) and against other formulas in use",
+      "key": false
+     }
+    ]
+   },
+   "text_edited": false,
+   "candidates": [
+    {
+     "cid": "c1",
+     "relation": "equivalent",
+     "covered_elements": [
+      "e1",
+      "e2",
+      "e3"
+     ],
+     "analogous_elements": [],
+     "restricted_elements": [],
+     "attribution": "unknown",
+     "cross_field": true,
+     "confidence": 2,
+     "rejected_evidence": [],
+     "added_evidence": [],
+     "note": "e1 to e3 covered by the definition of the trapezoidal rule, which the abstract names as the simplest Newton-Cotes procedure (clarification 2: a named standard method); the same formula allows unequal intervals. e4 is not key. Abstract only and no formula in the candidate's text, so confidence 2. Attribution unknown: the source's OpenAlex record lists no references."
+    }
+   ],
+   "added_candidates": [],
+   "verdict": "equivalent",
+   "status": "done",
+   "prefill_status": "draft",
+   "notes": ""
+  },
+  {
+   "id": "cf-9002",
+   "minutes": 30,
+   "claim": {
+    "text": "In multiple regression, estimates based on minimum residual sum of squares are likely to be unsatisfactory, if not incorrect, when the prediction vectors are far from orthogonal. Instead, estimate the coefficients as (X'X + kI)^(-1) X'Y, adding a small positive quantity k to the diagonal of X'X. The estimates are biased, but their mean square error can be smaller than that of least squares.",
+    "skeleton": "Fit a linear model by least squares plus a quadratic penalty on the coefficient vector that weights every coefficient equally, accepting some bias for lower variance when the inputs are strongly correlated.",
+    "chart": [
+     {
+      "id": "e1",
+      "text": "least-squares fit of a linear regression model (minimum residual sum of squares)",
+      "key": true
+     },
+     {
+      "id": "e2",
+      "text": "a quadratic penalty on the coefficients: a matrix is added to X'X before solving the normal equations",
+      "key": true
+     },
+     {
+      "id": "e3",
+      "text": "the added matrix is a positive multiple of the identity, kI: the same constant for every coefficient",
+      "key": true
+     }
+    ]
+   },
+   "text_edited": false,
+   "candidates": [
+    {
+     "cid": "c1",
+     "relation": "similar_mechanism",
+     "covered_elements": [],
+     "analogous_elements": [
+      "e1",
+      "e2",
+      "e3"
+     ],
+     "restricted_elements": [],
+     "attribution": "not_cited",
+     "cross_field": true,
+     "confidence": 1,
+     "rejected_evidence": [],
+     "added_evidence": [
+      {
+       "element": "e3",
+       "quote_candidate": "covariances of both the constraint vector and the measurement errors",
+       "quote_claim": "adding small positive quantities to the diagonal of X′X",
+       "location_candidate": "abstract, second sentence",
+       "location_claim": "abstract, second sentence",
+       "text_level": "abstract",
+       "general_form": false
+      }
+     ],
+     "note": "Unsure between specialization and similar_mechanism; took the lower (clarification 7), confidence 1. For specialization the candidate's maximum-likelihood estimate with covariances would have to be least squares plus a quadratic penalty, which needs normally distributed errors: a premise the abstract does not state and clarification 4 does not add. So each key element corresponds by role only: e1, maximum likelihood in the role of the least-squares criterion; e2, the a priori constraint vector with its covariance in the role of the quadratic penalty; e3, that covariance in the role of kI, which is stated only in the full text (the abstract says 'small positive quantities'). Abstract-only pairs. Checked OpenAlex references (11 works)."
+    }
+   ],
+   "added_candidates": [],
+   "verdict": "similar_mechanism",
+   "status": "done",
+   "prefill_status": "draft",
+   "notes": ""
+  },
+  {
+   "id": "cf-9003",
+   "minutes": 20,
+   "claim": {
+    "text": "A massively parallel network of simple binary units (each on or off) with symmetric weighted connections searches for good solutions of constraint satisfaction problems by a method based on statistical mechanics: units change state stochastically, so that at thermal equilibrium the probability of a global state is proportional to exp(-E/T), where E is its energy and T a temperature. A general rule for modifying the connection strengths compares, for each pair of connected units, how often both are on while the visible units are clamped to patterns from the environment and while the network runs freely. On simple examples the hidden units learn internal representations that use the existing connections efficiently.",
+    "skeleton": "Many simple two-state elements with symmetric pairwise links change state at random so that, after settling, each joint configuration occurs with a probability that falls exponentially with a cost assigned to it; each link strength is adjusted by the difference between how often its two elements are active together when some elements are held to observed data and when none are held.",
+    "chart": [
+     {
+      "id": "e1",
+      "text": "a network of binary units (on or off) joined by symmetric weighted connections, with an energy for every global state",
+      "key": true
+     },
+     {
+      "id": "e2",
+      "text": "stochastic state updates, so that at thermal equilibrium the probability of a global state is proportional to exp(-E/T)",
+      "key": true
+     },
+     {
+      "id": "e3",
+      "text": "learning: each connection strength changes by the difference between how often its two units are on together with the visible units clamped and with the network running freely",
+      "key": true
+     },
+     {
+      "id": "e4",
+      "text": "shown on simple examples in which hidden units form efficient internal representations",
+      "key": false
+     }
+    ]
+   },
+   "text_edited": false,
+   "candidates": [
+    {
+     "cid": "c1",
+     "relation": "different",
+     "covered_elements": [],
+     "analogous_elements": [],
+     "restricted_elements": [],
+     "attribution": "not_cited",
+     "cross_field": true,
+     "confidence": 3,
+     "rejected_evidence": [
+      0
+     ],
+     "added_evidence": [],
+     "note": "The candidate changes the collision terms of the kinetic equation of a gas: no network of units, no learning rule. At most e2 (relaxation to an equilibrium distribution) could be read as a role match; e1 and e3 have no counterpart, so different, not similar_mechanism. Pair #1 rejected: it links the works only by the name Boltzmann. Checked OpenAlex references (30 works)."
+    }
+   ],
+   "added_candidates": [],
+   "verdict": "nothing_close",
+   "status": "done",
+   "prefill_status": "draft",
+   "notes": "Practice item: no search done."
+  }
+ ]
+}

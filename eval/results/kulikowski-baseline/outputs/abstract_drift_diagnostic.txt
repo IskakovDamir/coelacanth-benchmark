@@ -1,0 +1,14 @@
+curated papers: 109; restricted abstracts inside the curated set: 4 ['gp-geo-noname-001', 'hawkes-crime-001', 'kalman-epidemic-001', 'pca-psychometrics-001']
+abstract + TF-IDF   : all 92 queries P@1=0.565 MRR=0.680 | 9 touching a rebuilt abstract P@1=0.333 | 83 untouched P@1=0.590 MRR=0.693
+fingerprint + TF-IDF: all 92 queries P@1=0.870 MRR=0.912 | 7 touching a rebuilt abstract P@1=0.571 | 85 untouched P@1=0.894 MRR=0.932
+
+abstract queries touching a rebuilt abstract (query / top-1 / first twin / hit):
+  gp-geo-noname-001                hawkes-seismology-001            fft-astro-distractor-001         miss
+  hawkes-crime-001                 hawkes-seismology-001            hawkes-seismology-001            HIT
+  hawkes-seismology-001            irt-ecology-001                  hawkes-crime-001                 miss
+  irt-education-002                pca-psychometrics-001            irt-psych-001                    miss
+  kalman-epidemic-001              kalman-glaciology-002            kalman-glaciology-002            HIT
+  pca-psychometrics-001            pca-recsys-001                   pca-recsys-001                   HIT
+  pca-recsys-001                   irt-psych-001                    pca-psychometrics-001            miss
+  pca-spectroscopy-002             clf-nlp-001                      pca-psychometrics-001            miss
+  sparse-genomics-001              pca-psychometrics-001            sparse-mri-001                   miss

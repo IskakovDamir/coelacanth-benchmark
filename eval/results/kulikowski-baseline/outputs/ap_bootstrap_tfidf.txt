@@ -1,0 +1,15 @@
+curated: 109 papers
+
+point AP (check vs reproduce.py): 5812 cross-field pairs, 210 twins
+  abstract + TF-IDF      0.223
+  skeleton + TF-IDF      0.513
+  fingerprint + TF-IDF   0.557
+
+per-method AP [95% CI] (paper bootstrap over papers, B=2000):
+  abstract + TF-IDF      0.223  [0.132, 0.358]
+  skeleton + TF-IDF      0.513  [0.376, 0.662]
+  fingerprint + TF-IDF   0.557  [0.407, 0.720]
+
+fingerprint+TF-IDF vs each (paired AP difference [95% CI], two-sided p):
+  vs abstract + TF-IDF      +0.334  [+0.173, +0.481]  p=0.0000
+  vs skeleton + TF-IDF      +0.044  [-0.081, +0.156]  p=0.3800

@@ -1,0 +1,366 @@
+{
+ "format": "coelacanth-batch/v1",
+ "batch": "practice",
+ "created": "2026-10-07",
+ "labels": [
+  "equivalent",
+  "specialization",
+  "generalization",
+  "partial",
+  "similar_mechanism",
+  "different"
+ ],
+ "items": [
+  {
+   "id": "cf-9001",
+   "prefill": {
+    "by": "claude-opus-5-5",
+    "date": "2026-10-07",
+    "status": "draft",
+    "fields": [
+     "claim.text",
+     "claim.skeleton",
+     "claim.coined_names",
+     "claim.date",
+     "claim.field",
+     "claim.domain",
+     "claim.computational",
+     "claim.source_work",
+     "claim.chart",
+     "candidates[].work",
+     "candidates[].evidence",
+     "candidates[].attribution_hint",
+     "candidates[].note",
+     "notes"
+    ]
+   },
+   "claim": {
+    "text": "To determine the area under a glucose tolerance curve, or under another metabolic curve, divide the area under the plotted curve between two chosen values on the x-axis (abscissas) into small segments, rectangles and triangles, whose areas can be accurately calculated from their geometrical formulas, and add these individual areas up. The measurement times on the x-axis need not be equally spaced. Compared with the areas obtained by the graphic method, the results differ by less than 0.4%, whereas other formulas in use under- or overestimate the area by a large margin.",
+    "skeleton": "Estimate the integral of a quantity measured only at a few, possibly unevenly spaced, times by treating the stretch between each pair of neighbouring measurements as a simple straight-edged shape and adding up the areas of these shapes.",
+    "coined_names": [
+     "Tai's model",
+     "Tai model",
+     "Tai's formula"
+    ],
+    "date": "1994-02-01",
+    "field": "Medicine",
+    "domain": "Health Sciences",
+    "computational": true,
+    "source_work": {
+     "openalex": "W2091101612",
+     "doi": "https://doi.org/10.2337/diacare.17.2.152",
+     "arxiv": null,
+     "pmid": "8137688",
+     "title": "A Mathematical Model for the Determination of Total Area Under Glucose Tolerance and Other Metabolic Curves",
+     "first_author": "Mary Tai",
+     "n_authors": 1,
+     "year": 1994,
+     "publication_date": "1994-02-01",
+     "venue": "Diabetes Care",
+     "field": "Medicine",
+     "domain": "Health Sciences",
+     "oa_url": null,
+     "cache_key": "oa-W2091101612"
+    },
+    "chart": [
+     {
+      "id": "e1",
+      "text": "the area under a curve known only at its measured points (values at the sampling times)",
+      "key": null
+     },
+     {
+      "id": "e2",
+      "text": "between two consecutive measurements the curve is replaced by a straight edge, so each segment is a rectangle plus a triangle",
+      "key": null
+     },
+     {
+      "id": "e3",
+      "text": "total area = sum over consecutive pairs of (x_k - x_(k-1)) * (y_(k-1) + y_k) / 2, with sampling intervals that may differ",
+      "key": null
+     },
+     {
+      "id": "e4",
+      "text": "the result is checked against the graphic method (within 0.4%) and against other formulas in use",
+      "key": null
+     }
+    ]
+   },
+   "candidates": [
+    {
+     "cid": "c1",
+     "work": {
+      "openalex": "W2316008801",
+      "doi": "https://doi.org/10.2307/2532462",
+      "arxiv": null,
+      "pmid": "2085635",
+      "title": "Estimating Integrals Using Quadrature Methods with an Application in Pharmacokinetics",
+      "first_author": "A. John Bailer",
+      "n_authors": 2,
+      "year": 1990,
+      "publication_date": "1990-12-01",
+      "venue": "Biometrics",
+      "field": "Mathematics",
+      "domain": "Physical Sciences",
+      "oa_url": null,
+      "cache_key": "oa-W2316008801"
+     },
+     "evidence": [
+      {
+       "element": "e1",
+       "quote_candidate": "The estimation of integrals using numerical quadrature is common in many biological studies.",
+       "quote_claim": "samples can be taken with differing time intervals and total area under the curve can still be determined with precision",
+       "location_candidate": "abstract, first sentence",
+       "location_claim": "abstract, conclusions",
+       "text_level": "abstract",
+       "general_form": false
+      },
+      {
+       "element": "e2",
+       "quote_candidate": "the simplest Newton-Côtes procedure, the trapezoidal rule",
+       "quote_claim": "into small segments (rectangles and triangles) whose areas can be accurately calculated from their respective geometrical formulas",
+       "location_candidate": "abstract, results",
+       "location_claim": "abstract, research design and methods",
+       "text_level": "abstract",
+       "general_form": false
+      },
+      {
+       "element": "e3",
+       "quote_candidate": "the simplest Newton-Côtes procedure, the trapezoidal rule",
+       "quote_claim": "The total sum of these individual areas thus represents the total area under the curve.",
+       "location_candidate": "abstract, results",
+       "location_claim": "abstract, research design and methods",
+       "text_level": "abstract",
+       "general_form": false
+      }
+     ],
+     "attribution_hint": "unknown",
+     "note": "Mathematics; 1990, Biometrics. Text: abstract only cached (oa-W2316008801). 3 pre-filled quote pairs."
+    }
+   ],
+   "notes": "Practice item; it never enters the benchmark. Only the abstracts of the source work and of c1 are cached, so every quote pair is at abstract level. The source's full text is at its DOI link (Diabetes Care); c1's full text is in Biometrics (JSTOR)."
+  },
+  {
+   "id": "cf-9002",
+   "prefill": {
+    "by": "claude-opus-5-5",
+    "date": "2026-10-07",
+    "status": "draft",
+    "fields": [
+     "claim.text",
+     "claim.skeleton",
+     "claim.coined_names",
+     "claim.date",
+     "claim.field",
+     "claim.domain",
+     "claim.computational",
+     "claim.source_work",
+     "claim.chart",
+     "candidates[].work",
+     "candidates[].evidence",
+     "candidates[].attribution_hint",
+     "candidates[].note",
+     "notes"
+    ]
+   },
+   "claim": {
+    "text": "In multiple regression, estimates based on minimum residual sum of squares are likely to be unsatisfactory, if not incorrect, when the prediction vectors are far from orthogonal. Instead, estimate the coefficients as (X'X + kI)^(-1) X'Y, adding a small positive quantity k to the diagonal of X'X. The estimates are biased, but their mean square error can be smaller than that of least squares.",
+    "skeleton": "Fit a linear model by least squares plus a quadratic penalty on the coefficient vector that weights every coefficient equally, accepting some bias for lower variance when the inputs are strongly correlated.",
+    "coined_names": [
+     "ridge regression",
+     "ridge trace",
+     "ridge estimator"
+    ],
+    "date": "1970-02-01",
+    "field": "Mathematics",
+    "domain": "Physical Sciences",
+    "computational": true,
+    "source_work": {
+     "openalex": "W4234698323",
+     "doi": "https://doi.org/10.1080/00401706.1970.10488634",
+     "arxiv": null,
+     "pmid": null,
+     "title": "Ridge Regression: Biased Estimation for Nonorthogonal Problems",
+     "first_author": "Arthur E. Hoerl",
+     "n_authors": 2,
+     "year": 1970,
+     "publication_date": "1970-02-01",
+     "venue": "Technometrics",
+     "field": "Mathematics",
+     "domain": "Physical Sciences",
+     "oa_url": null,
+     "cache_key": "oa-W4234698323"
+    },
+    "chart": [
+     {
+      "id": "e1",
+      "text": "least-squares fit of a linear regression model (minimum residual sum of squares)",
+      "key": null
+     },
+     {
+      "id": "e2",
+      "text": "a quadratic penalty on the coefficients: a matrix is added to X'X before solving the normal equations",
+      "key": null
+     },
+     {
+      "id": "e3",
+      "text": "the added matrix is a positive multiple of the identity, kI: the same constant for every coefficient",
+      "key": null
+     }
+    ]
+   },
+   "candidates": [
+    {
+     "cid": "c1",
+     "work": {
+      "openalex": "W2051089233",
+      "doi": "https://doi.org/10.1145/321439.321445",
+      "arxiv": null,
+      "pmid": null,
+      "title": "Statistical Estimation of the Numerical Solution of a Fredholm Integral Equation of the First Kind",
+      "first_author": "Otto Neall Strand",
+      "n_authors": 2,
+      "year": 1968,
+      "publication_date": "1968-01-01",
+      "venue": "Journal of the ACM",
+      "field": "Mathematics",
+      "domain": "Physical Sciences",
+      "oa_url": "https://doi.org/10.1145/321439.321445",
+      "cache_key": "oa-W2051089233"
+     },
+     "evidence": [
+      {
+       "element": "e1",
+       "quote_candidate": "The method automatically incorporates an optimum amount of smoothing in the sense of maximum-likelihood estimation.",
+       "quote_claim": "parameter estimates based on minimum residual sum of squares",
+       "location_candidate": "abstract, third sentence",
+       "location_claim": "abstract, first sentence",
+       "text_level": "abstract",
+       "general_form": false
+      },
+      {
+       "element": "e2",
+       "quote_candidate": "The method employs an a priori constraint vector together with covariances of both the constraint vector and the measurement errors.",
+       "quote_claim": "Proposed is an estimation procedure based on adding small positive quantities to the diagonal of X′X.",
+       "location_candidate": "abstract, second sentence",
+       "location_claim": "abstract, second sentence",
+       "text_level": "abstract",
+       "general_form": false
+      }
+     ],
+     "attribution_hint": "not_cited",
+     "note": "Mathematics; 1968, Journal of the ACM. Text: abstract only cached (oa-W2051089233). 2 pre-filled quote pairs."
+    }
+   ],
+   "notes": "Practice item; it never enters the benchmark. Only the abstracts of the source work and of c1 are cached, so every quote pair is at abstract level. The source's full text is in Technometrics (Taylor and Francis, JSTOR); c1's full text is at its DOI link (ACM Digital Library). The abstract speaks of 'small positive quantities' added to the diagonal of X'X; the estimator with one constant k, (X'X + kI)^(-1) X'Y, is how the paper's full text states it."
+  },
+  {
+   "id": "cf-9003",
+   "prefill": {
+    "by": "claude-opus-5-5",
+    "date": "2026-10-07",
+    "status": "draft",
+    "fields": [
+     "claim.text",
+     "claim.skeleton",
+     "claim.coined_names",
+     "claim.date",
+     "claim.field",
+     "claim.domain",
+     "claim.computational",
+     "claim.source_work",
+     "claim.chart",
+     "candidates[].work",
+     "candidates[].evidence",
+     "candidates[].attribution_hint",
+     "candidates[].note",
+     "notes"
+    ]
+   },
+   "claim": {
+    "text": "A massively parallel network of simple binary units (each on or off) with symmetric weighted connections searches for good solutions of constraint satisfaction problems by a method based on statistical mechanics: units change state stochastically, so that at thermal equilibrium the probability of a global state is proportional to exp(-E/T), where E is its energy and T a temperature. A general rule for modifying the connection strengths compares, for each pair of connected units, how often both are on while the visible units are clamped to patterns from the environment and while the network runs freely. On simple examples the hidden units learn internal representations that use the existing connections efficiently.",
+    "skeleton": "Many simple two-state elements with symmetric pairwise links change state at random so that, after settling, each joint configuration occurs with a probability that falls exponentially with a cost assigned to it; each link strength is adjusted by the difference between how often its two elements are active together when some elements are held to observed data and when none are held.",
+    "coined_names": [
+     "Boltzmann machine",
+     "Boltzmann machines"
+    ],
+    "date": "1985-01-01",
+    "field": "Computer Science",
+    "domain": "Physical Sciences",
+    "computational": true,
+    "source_work": {
+     "openalex": "W2042492924",
+     "doi": "https://doi.org/10.1207/s15516709cog0901_7",
+     "arxiv": null,
+     "pmid": null,
+     "title": "A Learning Algorithm for Boltzmann Machines*",
+     "first_author": "David H. Ackley",
+     "n_authors": 3,
+     "year": 1985,
+     "publication_date": "1985-01-01",
+     "venue": "Cognitive Science",
+     "field": "Computer Science",
+     "domain": "Physical Sciences",
+     "oa_url": null,
+     "cache_key": "oa-W2042492924"
+    },
+    "chart": [
+     {
+      "id": "e1",
+      "text": "a network of binary units (on or off) joined by symmetric weighted connections, with an energy for every global state",
+      "key": null
+     },
+     {
+      "id": "e2",
+      "text": "stochastic state updates, so that at thermal equilibrium the probability of a global state is proportional to exp(-E/T)",
+      "key": null
+     },
+     {
+      "id": "e3",
+      "text": "learning: each connection strength changes by the difference between how often its two units are on together with the visible units clamped and with the network running freely",
+      "key": null
+     },
+     {
+      "id": "e4",
+      "text": "shown on simple examples in which hidden units form efficient internal representations",
+      "key": null
+     }
+    ]
+   },
+   "candidates": [
+    {
+     "cid": "c1",
+     "work": {
+      "openalex": "W2066060292",
+      "doi": "https://doi.org/10.1103/physrev.94.511",
+      "arxiv": null,
+      "pmid": null,
+      "title": "A Model for Collision Processes in Gases. I. Small Amplitude Processes in Charged and Neutral One-Component Systems",
+      "first_author": "Prabhu L. Bhatnagar",
+      "n_authors": 3,
+      "year": 1954,
+      "publication_date": "1954-05-01",
+      "venue": "Physical Review",
+      "field": "Mathematics",
+      "domain": "Physical Sciences",
+      "oa_url": null,
+      "cache_key": "oa-W2066060292"
+     },
+     "evidence": [
+      {
+       "element": "e2",
+       "quote_candidate": "The method consists in altering the collision terms in the Boltzmann equation.",
+       "quote_claim": "We describe a general parallel search method, based on statistical mechanics",
+       "location_candidate": "abstract, fourth sentence",
+       "location_claim": "abstract, fifth sentence",
+       "text_level": "abstract",
+       "general_form": false
+      }
+     ],
+     "attribution_hint": "not_cited",
+     "note": "Mathematics; 1954, Physical Review. Text: abstract only cached (oa-W2066060292). 1 pre-filled quote pair."
+    }
+   ],
+   "notes": "Practice item; it never enters the benchmark. Only the abstracts of the source work and of c1 are cached, so every quote pair is at abstract level. The source's full text is at its DOI link (Cognitive Science, Wiley)."
+  }
+ ]
+}
