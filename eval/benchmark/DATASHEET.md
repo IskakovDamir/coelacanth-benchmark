@@ -42,4 +42,4 @@ The code, protocol, labelling guide and this datasheet are public at https://git
 
 ## Maintenance
 
-The author maintains v0. The protocol is frozen (tag `protocol-v1.0`, commit 658b3fb); later changes are logged as deviations in `eval/protocol.md` section 14. Contact: [to be filled before release].
+The author maintains v0. The protocol is frozen (tag `protocol-v1.0`, commit 658b3fb); `eval/protocol-v1.0.md` is the protocol exactly as tagged, and later changes are logged as deviations in `eval/protocol.md` section 14. Contact: [to be filled before release].
