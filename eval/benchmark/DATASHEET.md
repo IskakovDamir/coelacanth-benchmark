@@ -1,0 +1,45 @@
+# Datasheet for Coelacanth v0
+
+Draft of 2026-10-11 for the release planned on 30 October 2026. It follows the sections of "Datasheets for Datasets" (Gebru et al.) and states how each file was produced. Numbers trace to `eval/benchmark/v0/`, `eval/results/` and `eval/protocol.md`; the paper (`paper/ecir2027/draft.md`) uses the same ones.
+
+## Motivation
+
+- **Purpose.** To evaluate tools that check whether an idea has been done before on earlier work stated in another field's vocabulary, with typed verdicts and a closed-book control for memorization. It is a resource, not a claim about how common rediscovery is.
+- **Creator.** Damir Iskakov. The work was paid for by the author (API credit, annotators' pay); no outside funding is recorded.
+
+## Composition
+
+- **Items.** 60 items in batches b01 and b02: 14 rediscovery positives from Kulikowski's twins, 13 from published equivalence declarations, 2 from the Gradient Coupling catalogue, 1 post-cutoff lead, 2 non-computational controls, 8 attributed controls (`C`), 10 near-negatives, 10 AI-generated methods (`A`, no candidates yet). Batch b03 (cf-0068, cf-0069) was labelled and probed apart and is not counted.
+- **Subsets of the freeze** (`eval/results/splits/splits-v1.json`): `R` 10 (adjudicated rediscovery positives with a cross-field gold work the later work does not cite), `R_recalled` 9, `H` 0, `N` 15 (adjudicated verdict `nothing_close`; 9 built as near-negatives), `C` 8, `A` 10, `K` 92 closed-pool queries.
+- **What an item holds.** A field-native claim text (at most 120 words, without author names, titles, years, venues or the coined method name) and its date; a claim chart of two to six elements; candidate earlier works with verbatim quote pairs (at most 40 words per side) checked in code against cached texts; a typed relation per claim-candidate pair (equivalent, specialization, generalization, partial, similar mechanism, different); the item verdict; closed-book answers of three Claude models under two prompts.
+- **Gold** (the earlier works and labels) ships in a password-protected archive with a canary string, not in plain text.
+- **Personal data.** Annotators are identified by an ID only. No other personal data.
+- **Known gaps.** The 10 AI-origin items have no candidates. Key flags and chart edits were not collected from annotators. The closed-book data are complete except 9 samples (Opus 5.5 on three AI-origin items). `H` is empty, so there is no closed-book-unrecalled subset.
+
+## Collection process and who chose the labels
+
+- **Human work in numbers.** 716 recorded human decisions (`eval/results/human-decisions/human-decisions.json`, paper Table 4): 272 quiz answers by paid annotators on 136 claim-candidate pairs (two readings each), 48 attribution readings, 51 claim-text checks, 6 answers on batch b03 and 31 judgments of closed-book named works (408 by annotators), 51 disagreements settled, 14 named works adjudicated and 30 borderline matches re-decided by the author (95), and 213 borderline closed-book matches decided by people whose split between annotators and author is not recorded. The counts are of answers, not of people; the number of distinct students is not recorded.
+- **Sources.** Kulikowski's cross-field twins (CC-BY-4.0), published equivalence declarations found by OpenAlex phrase queries and screened by Claude Haiku 4.5, a public catalogue, a literature sweep, two hand-picked non-computational controls, and methods that Claude Sonnet 5 and Opus 5.5 proposed as new.
+- **Pre-fill.** Claude drafted claim texts, charts, candidates and quote pairs, and proposed three relation options per pair (fixed precedence order; its first choice was never shown).
+- **Pair labels.** Five paid annotators with graduate STEM training (two women, three men, aged 26 to 37; three MSc, two PhD; universities in the United States, the United Kingdom and Kazakhstan) chose each pair's relation in a quiz, two readings per pair, on 10 October 2026 in the author's presence; their answers are recorded under three IDs (a1 and a2 each used by two people, a3 by one, no person under two IDs; which of two people gave a given answer is not recorded). Their comments were pasted from outside the quiz page and are not used as evidence of reasoning. Median page time was 12 to 14.5 s per question; 189 of 272 answers (0.695) equal the option Claude ranked first. Krippendorff's alpha is 0.542 (six-way relation), 0.783 (gold), 0.321 ("already done") and 0.794 (cross-field), below the pre-registered thresholds of 0.667 and 0.80; the author settled all 51 disagreements.
+- **Attribution and claim texts.** Checked in separate rounds in the author's presence, with the files repackaged by Codex (a model) at his request; the two attribution readings are word for word identical, and 4 pairs were decided by Claude from reference lists in Crossref under the author's delegation.
+- **Batch b03 and the works the models named closed-book.** Answered by hand on printed sheets and transcribed into the export format by Codex; the files show one export time to the millisecond, no page time and a non-person `answered_by` value. The relation and cross-field values are taken as the annotators' on the author's statement. The author adjudicated all 14 gold-rated named works himself.
+- **Closed-book borderline matches.** 213 were decided by people (entries split among annotators and the author, who decided which was not recorded); a re-decision of 30 was made by the author.
+
+## Preprocessing and verification
+
+Quote pairs are checked verbatim after normalisation (`src/coelacanth/quotes.py`); the loader enforces 12 validation rules (`eval/benchmark/SCHEMA.md`). Claims are field-native; a neutral skeleton exists for a vocabulary-barrier ablation and is not shown to systems otherwise.
+
+## Uses
+
+- **Intended.** Evaluating retrieval of cross-field earlier work and typed verdicts of novelty and precedent checkers, with recalled and unrecalled items reported separately.
+- **Not intended.** Judging individual authors or papers (`nothing_close` is a statement about a search, attributed imports are controls, and the wording never accuses); training models (the archive carries a canary string, following Jacovi et al., 2023); claims about undocumented rediscoveries.
+- **Limits.** Documented rediscoveries are exposed to models by construction; the labels are one supervised reading, not two independent ones; retrieval figures in the paper are lower bounds against adjudicated gold.
+
+## Distribution
+
+Planned: a GitHub repository and a Zenodo DOI with the arXiv preprint on 30 October 2026. Code is MIT; data is CC-BY-4.0 (`eval/benchmark/LICENSE`); OpenAlex metadata is CC0; Kulikowski's derived data and the Gradient Coupling catalogue are CC-BY-4.0 and attributed. No Semantic Scholar or Asta records or full texts are shipped.
+
+## Maintenance
+
+The author maintains v0. The protocol is frozen (tag `protocol-v1.0`, commit 658b3fb); later changes are logged as deviations in `eval/protocol.md` section 14. Contact: [to be filled before release].

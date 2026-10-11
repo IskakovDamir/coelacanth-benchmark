@@ -1,0 +1,163 @@
+{
+ "format": "coelacanth-batch-meta/v1",
+ "batch": "practice",
+ "items": {
+  "cf-9001": {
+   "seed": "LABELING.md section 4, worked example E1",
+   "found_by": {
+    "c1": [
+     "mining:labeling_guide"
+    ]
+   },
+   "provenance": {
+    "source": "guide",
+    "mined_by": "manual",
+    "dataset": "LABELING.md",
+    "license": "CC-BY-4.0",
+    "attribution": "Coelacanth"
+   },
+   "exposure": {
+    "kind": "letter",
+    "work": "W2125573108",
+    "date": "1994-10-01"
+   },
+   "origin": {
+    "kind": "human",
+    "system": null,
+    "mode": null
+   },
+   "negative": null,
+   "exclusions": [
+    "W2091101612",
+    "W2125573108"
+   ],
+   "prefill": {
+    "by": "claude-opus-5-5",
+    "date": "2026-10-07",
+    "status": "draft",
+    "fields": [
+     "claim.text",
+     "claim.skeleton",
+     "claim.coined_names",
+     "claim.date",
+     "claim.field",
+     "claim.domain",
+     "claim.computational",
+     "claim.source_work",
+     "claim.chart",
+     "candidates[].work",
+     "candidates[].evidence",
+     "candidates[].attribution_hint",
+     "candidates[].note",
+     "notes"
+    ]
+   },
+   "drafting_notes": "Guide example E1. The guide's candidate, the trapezoidal rule as such, has no work dated before the claim with a cacheable text: OpenAlex has no abstract for Yeh and Kwan 1978 (W2009136130), Chiou 1978 (W2066806870), Purves 1992 (W2042925852) or Bailer 1988 (W2029789274); Matthews et al. 1990 BMJ (PMC1662068) and four other pre-1994 PMC papers tried have no full-text XML in Europe PMC, and the J Gen Physiol full texts that do (PMC2215046, PMC2215108, PMC2215434) only name the rule; the arXiv API returns no paper on the rule before 1994; the Semantic Scholar client has no key and the OpenAlex search budget of the day was spent, so only identifiers known in advance could be looked up. c1 is Bailer and Piegorsch 1990, Biometrics (W2316008801), whose OpenAlex abstract describes quadrature for areas under concentration-time curves and names the trapezoidal rule as the simplest Newton-Cotes procedure. Le Floch et al. 1990, Diabetes Care (W2095455974), also names the rule for glucose AUC but is same-field, so it was not used. Exposure: Monaco and Anderson, 'Tai's formula is the trapezoidal rule', Diabetes Care 17(10):1224-1225 (W2125573108). Tai's OpenAlex record has no reference list, so the attribution hint is unknown.",
+   "prefill_assessment": "Reference labels in key.json: c1 equivalent, e1 to e3 covered, e4 (validation against the graphic method) not key, confidence 2 because only abstracts are cached, cross-field true (statistics vs diabetes research). The e2 and e3 candidate quotes rest on the definition of the named procedure, which is the point to discuss with the annotators."
+  },
+  "cf-9002": {
+   "seed": "LABELING.md section 4, worked example S1",
+   "found_by": {
+    "c1": [
+     "mining:labeling_guide"
+    ]
+   },
+   "provenance": {
+    "source": "guide",
+    "mined_by": "manual",
+    "dataset": "LABELING.md",
+    "license": "CC-BY-4.0",
+    "attribution": "Coelacanth"
+   },
+   "exposure": {
+    "kind": "review",
+    "work": null,
+    "date": null
+   },
+   "origin": {
+    "kind": "human",
+    "system": null,
+    "mode": null
+   },
+   "negative": null,
+   "exclusions": [
+    "W4234698323"
+   ],
+   "prefill": {
+    "by": "claude-opus-5-5",
+    "date": "2026-10-07",
+    "status": "draft",
+    "fields": [
+     "claim.text",
+     "claim.skeleton",
+     "claim.coined_names",
+     "claim.date",
+     "claim.field",
+     "claim.domain",
+     "claim.computational",
+     "claim.source_work",
+     "claim.chart",
+     "candidates[].work",
+     "candidates[].evidence",
+     "candidates[].attribution_hint",
+     "candidates[].note",
+     "notes"
+    ]
+   },
+   "drafting_notes": "Guide example S1. The guide's candidate, Tikhonov 1963 (Soviet Math Dokl), could not be looked up: no DOI or OpenAlex ID was at hand and the OpenAlex search budget of the day was spent; Phillips 1962 and Twomey 1963 (J ACM) have only publisher page text in OpenAlex's abstract field; Foster 1961 and Marquardt 1963 (SIAM) only a reference list; Tikhonov and Glasko 1965 (W2064880038) no abstract. c1 is Strand and Westwater 1968, J ACM 15(1):100-114 (W2051089233), whose abstract states the estimator with an a priori constraint vector and covariances of the constraint vector and of the measurement errors, the general quadratic-constraint form. Hoerl and Kennard's 11 OpenAlex references do not include it. The e3 quote pair is deliberately not pre-filled: annotators add it.",
+   "prefill_assessment": "Reference labels in key.json: c1 similar_mechanism, analogous e1 to e3, confidence 1, specialization named as the second label (the normal-errors premise is not in the candidate's abstract, clarification 4); added e3 pair without general form; cross-field true although OpenAlex files both works under Mathematics."
+  },
+  "cf-9003": {
+   "seed": "LABELING.md section 4, worked example D1",
+   "found_by": {
+    "c1": [
+     "mining:labeling_guide"
+    ]
+   },
+   "provenance": {
+    "source": "guide",
+    "mined_by": "manual",
+    "dataset": "LABELING.md",
+    "license": "CC-BY-4.0",
+    "attribution": "Coelacanth"
+   },
+   "exposure": {
+    "kind": "our_search",
+    "work": null,
+    "date": null
+   },
+   "origin": {
+    "kind": "human",
+    "system": null,
+    "mode": null
+   },
+   "negative": null,
+   "exclusions": [
+    "W2042492924"
+   ],
+   "prefill": {
+    "by": "claude-opus-5-5",
+    "date": "2026-10-07",
+    "status": "draft",
+    "fields": [
+     "claim.text",
+     "claim.skeleton",
+     "claim.coined_names",
+     "claim.date",
+     "claim.field",
+     "claim.domain",
+     "claim.computational",
+     "claim.source_work",
+     "claim.chart",
+     "candidates[].work",
+     "candidates[].evidence",
+     "candidates[].attribution_hint",
+     "candidates[].note",
+     "notes"
+    ]
+   },
+   "drafting_notes": "Guide example D1. Boltzmann's 1872 paper could not be looked up (no DOI or OpenAlex ID at hand, no search budget); Grad 1949, Comm Pure Appl Math (W2131947874), has no abstract in OpenAlex. c1 is Bhatnagar, Gross and Krook 1954, Phys Rev 94:511 (W2066060292), a kinetic-theory paper on the collision terms of the Boltzmann equation, the transport equation of the guide's example. The claim text describes the equilibrium distribution instead of naming it (eponym rule, LABELING.md section 2). Ackley et al.'s 30 OpenAlex references do not include c1.",
+   "prefill_assessment": "Reference labels in key.json: c1 different; the one pre-filled quote pair links the two works through the name only and is rejected in the key; e4 (the demonstration on simple examples) not key."
+  }
+ }
+}

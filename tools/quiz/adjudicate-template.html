@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Разбор расхождений</title>
+<style>
+:root {
+  --bg: #fbfbfa; --panel: #ffffff; --fg: #1d1d1f; --muted: #5f6368; --line: #e3e3e0; --line-strong: #c9c9c4;
+  --accent: #1f5fbf; --accent-soft: #e8f0fc; --ok: #1e7b45; --warn: #a15c00; --quote: #f4f4f1; --excl: #a12b2b;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111113; --panel: #19191c; --fg: #ececec; --muted: #a0a0a6; --line: #2c2c31; --line-strong: #44444b;
+    --accent: #7fb0ff; --accent-soft: #1d2a40; --ok: #5cc98a; --warn: #e0a64a; --quote: #202024; --excl: #f08080;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111113; --panel: #19191c; --fg: #ececec; --muted: #a0a0a6; --line: #2c2c31; --line-strong: #44444b;
+  --accent: #7fb0ff; --accent-soft: #1d2a40; --ok: #5cc98a; --warn: #e0a64a; --quote: #202024; --excl: #f08080;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.55 var(--font); }
+body { padding: 0 16px 64px; }
+main { max-width: 1040px; margin: 0 auto; }
+a { color: var(--accent); }
+h1 { font-size: 21px; margin: 16px 0 6px; }
+h2 { font-size: 17px; margin: 0 0 6px; }
+h3 { font-size: 15px; margin: 12px 0 6px; }
+p { margin: 6px 0; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.mono { font-family: var(--mono); font-size: 12.5px; }
+.top { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.top-in { max-width: 1040px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding: 8px 0; }
+.top .grow { flex: 1 1 100%; }
+.bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; width: 100%; margin-top: 4px; }
+.bar > div { height: 100%; background: var(--accent); }
+.btn { font: inherit; font-size: 14px; padding: 6px 12px; border-radius: 7px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--fg); cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 600; }
+select.btn { padding: 5px 8px; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
+.item { scroll-margin-top: 130px; border-top: 2px solid var(--line-strong); padding-top: 14px; margin-top: 26px; }
+.label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 2px; }
+ol.chart { margin: 4px 0 0; padding-left: 22px; }
+ol.chart li { margin: 3px 0; }
+.eid { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-right: 6px; }
+.links a { margin-right: 10px; white-space: nowrap; }
+.work-title { font-weight: 600; }
+.cand { border-left: 3px solid var(--accent); padding-left: 12px; margin: 18px 0; }
+details > summary { cursor: pointer; color: var(--accent); }
+.element { margin: 12px 0 4px; font-size: 13.5px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; }
+.quote { background: var(--quote); border-left: 3px solid var(--line-strong); padding: 6px 9px; border-radius: 4px; font-size: 14px; }
+.quote.c { border-left-color: var(--accent); }
+.quote .loc { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; }
+.colhead { font-size: 12px; color: var(--muted); }
+.entry { scroll-margin-top: 130px; background: var(--panel); border: 1px solid var(--line-strong); border-radius: 8px; padding: 12px 14px; margin: 12px 0; }
+.entry.done { border-color: var(--ok); }
+.entry-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.entry-head .what { font-weight: 700; }
+.readings { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; align-items: start; }
+.reading { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; background: var(--bg); min-width: 0; }
+.reading .who { font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.reading .val { font-weight: 600; margin: 2px 0 4px; }
+.comment { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13.5px; max-height: 260px; overflow: auto; border-top: 1px dashed var(--line); padding-top: 4px; }
+.opts { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.opt { font: inherit; font-size: 13.5px; padding: 6px 10px; border-radius: 7px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--fg); cursor: pointer; text-align: left; }
+.opt:hover { border-color: var(--accent); }
+.opt .k { font-family: var(--mono); font-size: 11.5px; color: var(--muted); display: block; }
+.opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.opt.ex[aria-pressed="true"] { border-color: var(--excl); box-shadow: inset 0 0 0 1px var(--excl); }
+.opt.read { border-style: dashed; }
+input[type=text] { width: 100%; font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line-strong); border-radius: 6px; padding: 6px 9px; }
+.status { font-size: 13px; }
+.ok { color: var(--ok); }
+.warn { color: var(--warn); }
+table.rels { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.rels td { border-top: 1px solid var(--line); padding: 6px; vertical-align: top; }
+.msg { font-size: 13px; }
+.hidden { display: none !important; }
+@media (max-width: 680px) {
+  body { padding: 0 12px 48px; }
+  .top { position: static; }
+  .entry, .item { scroll-margin-top: 8px; }
+  .pair, .readings { grid-template-columns: 1fr; }
+  table.rels td { display: block; border-top: none; padding: 2px 4px; }
+  table.rels tr { display: block; border-top: 1px solid var(--line); padding: 6px 0; }
+}
+</style>
+</head>
+<body>
+<div class="top"><div class="top-in" id="top"></div></div>
+<main id="app"></main>
+<script type="application/json" id="adj-data">
+{"decisions": {"format": "coelacanth-quiz-decisions/v1", "adjudicator": "damir", "template_hash": "demo", "inputs": {}, "entries": [
+ {"key": "cf-9999/c1/relation", "item": "cf-9999", "candidate": "c1", "batch": "demo", "kind": "relation",
+  "readings": [{"annotator": "a1", "value": "equivalent", "comment": "Demo comment."}, {"annotator": "a2", "value": "similar_mechanism", "comment": ""}],
+  "allowed": ["equivalent", "specialization", "generalization", "partial", "similar_mechanism", "different", "exclude"], "decision": "", "reason": ""}]},
+ "relations": ["equivalent", "specialization", "generalization", "partial", "similar_mechanism", "different"],
+ "items": [{"id": "cf-9999", "batch": "demo", "prefill_by": "claude-opus-5-5",
+  "claim": {"date": "2001-05-14", "field": "Pharmacology (demo)", "text": "Demo claim (not a real paper).", "skeleton": "Demo skeleton.", "chart": [{"id": "e1", "text": "first element"}]},
+  "source": {"title": "Demo source work", "first_author": "D. Example", "year": 2001},
+  "candidates": [{"cid": "c1", "work": {"title": "Demo candidate", "first_author": "E. Sample", "year": 1950, "doi": "10.5555/demo.2"},
+   "evidence": [{"element": "e1", "quote_candidate": "candidate quote", "quote_claim": "claim quote", "location_candidate": "abstract", "location_claim": "abstract", "text_level": "abstract", "general_form": false}]}]}]}
+</script>
+<script>
+(() => {
+"use strict";
+
+const NAMES = {
+  equivalent: ["То же самое", "Ранняя работа говорит то же при тех же условиях, другими словами или обозначениями."],
+  specialization: ["Утверждение: частный случай ранней работы", "Фиксация параметра или добавленное условие в ранней работе дают утверждение с тем же смыслом."],
+  generalization: ["Утверждение: обобщение ранней работы", "Ранняя работа получается из утверждения ограничением (параметр, условие)."],
+  partial: ["Частичное совпадение", "Не меньше двух ключевых элементов с тем же смыслом, хотя бы одного ключевого нет."],
+  similar_mechanism: ["Похожий механизм", "У каждого ключевого элемента есть соответствие хотя бы по роли, но система или смысл переменных другие."],
+  different: ["Разное", "Меньше двух ключевых элементов совпадают, и не у каждого есть соответствие."],
+  exclude: ["Исключить пару", "Пару нельзя разметить (кандидат не раньше утверждения, не та работа, нет текста и т. п.); в labels.json она уходит в исключённые."],
+  yes: ["Да, другая область", ""],
+  no: ["Нет, та же область", ""],
+  cannot_decide: ["Не могу решить", ""]
+};
+function vname(v) { return v === null || v === undefined ? "(только текст, без отношения)" : (NAMES[v] ? NAMES[v][0] : v); }
+
+const DATA = JSON.parse(document.getElementById("adj-data").textContent);
+const DEC = DATA.decisions;
+const ENTRIES = DEC.entries;
+const ITEMS = {};
+DATA.items.forEach(it => { ITEMS[it.id] = it; });
+const STORAGE_KEY = "coelacanth-adjudication:" + DEC.template_hash;
+const THEME_KEY = "coelacanth-adjudication:theme";
+
+let state = {};       // key -> {decision, reason}
+let filter = "all";   // all | open
+let message = "";
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) { const s = JSON.parse(raw); if (s && typeof s === "object") state = s; }
+  } catch (e) { /* storage blocked: the page still works, without autosave */ }
+  ENTRIES.forEach(e => {
+    if (!state[e.key]) state[e.key] = {decision: e.decision || "", reason: e.reason || ""};
+  });
+}
+let saveOk = true;
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); saveOk = true; } catch (e) { saveOk = false; }
+}
+function applyTheme(t) {
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  else document.documentElement.removeAttribute("data-theme");
+}
+function theme() { try { return localStorage.getItem(THEME_KEY) || "auto"; } catch (e) { return "auto"; } }
+
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "class") el.className = v;
+    else el.setAttribute(k, v === true ? "" : String(v));
+  }
+  for (const kid of kids.flat()) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.appendChild(typeof kid === "string" || typeof kid === "number" ? document.createTextNode(String(kid)) : kid);
+  }
+  return el;
+}
+
+function isDone(e) {
+  const s = state[e.key];
+  return !!(s && e.allowed.includes(s.decision) && s.reason.trim());
+}
+function doneCount() { return ENTRIES.filter(isDone).length; }
+
+function links(w) {
+  const out = [];
+  if (!w) return out;
+  if (w.doi) out.push(["DOI", /^https?:/i.test(w.doi) ? w.doi : "https://doi.org/" + w.doi]);
+  if (w.openalex) out.push(["OpenAlex", "https://openalex.org/" + String(w.openalex).replace(/^https?:\/\/openalex\.org\//i, "")]);
+  if (w.arxiv) out.push(["arXiv", "https://arxiv.org/abs/" + w.arxiv]);
+  if (w.pmid) out.push(["PubMed", "https://pubmed.ncbi.nlm.nih.gov/" + w.pmid + "/"]);
+  if (w.oa_url && !out.some(l => l[1] === w.oa_url)) out.push(["Открытый текст", w.oa_url]);
+  return out;
+}
+function workLine(w) {
+  const author = w.first_author ? w.first_author + (w.n_authors > 1 ? " и др." : "") : "";
+  return [author, w.year, w.venue].filter(Boolean).join(", ") + (w.publication_date ? " · дата " + w.publication_date : "");
+}
+function linkRow(w) {
+  const ls = links(w);
+  return h("div", {class: "links small"}, ls.length ? ls.map(([t, u]) => h("a", {href: u, target: "_blank", rel: "noopener noreferrer"}, t)) : h("span", {class: "muted"}, "ссылок нет"));
+}
+function levelText(e) { return e.text_level === "full_text" || e.text_level === "full" ? "полный текст" : e.text_level === "abstract" ? "аннотация" : (e.text_level || ""); }
+
+function relTable() {
+  return h("table", {class: "rels"}, DATA.relations.concat(["exclude"]).map(r => h("tr", {},
+    h("td", {}, h("b", {}, NAMES[r][0]), h("div", {class: "mono muted"}, r)), h("td", {}, NAMES[r][1]))));
+}
+
+function download(text, name, type) {
+  const blob = new Blob([text], {type});
+  const url = URL.createObjectURL(blob);
+  const a = h("a", {href: url, download: name});
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function filled() {
+  const out = JSON.parse(JSON.stringify(DEC));
+  out.entries.forEach(e => {
+    const s = state[e.key] || {};
+    e.decision = s.decision || "";
+    e.reason = (s.reason || "").trim();
+  });
+  return JSON.stringify(out, null, 1) + "\n";
+}
+function onDownload() {
+  const left = ENTRIES.length - doneCount();
+  download(filled(), "decisions.json", "application/json");
+  message = left ? "Скачано, но не решено " + left + ": apply откажет, пока все не решены с причиной." : "Скачано: все " + ENTRIES.length + " решены.";
+  renderTop();
+}
+function onCopy() {
+  const text = filled();
+  const ok = () => { message = "JSON скопирован."; renderTop(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, () => { message = "Не удалось скопировать: используйте «Скачать»."; renderTop(); });
+  else { message = "Буфер обмена недоступен: используйте «Скачать»."; renderTop(); }
+}
+function onLoadFile(ev) {
+  const f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (d.template_hash !== DEC.template_hash) { message = "Этот файл от другого шаблона (template_hash не совпадает): не загружен."; renderTop(); return; }
+      let n = 0;
+      (d.entries || []).forEach(e => { if (state[e.key]) { state[e.key] = {decision: e.decision || "", reason: e.reason || ""}; n++; } });
+      save(); message = "Загружено решений: " + n + "."; renderAll();
+    } catch (e) { message = "Не JSON: файл не загружен."; renderTop(); }
+  };
+  r.readAsText(f);
+}
+function nextOpen() {
+  const e = ENTRIES.find(x => !isDone(x));
+  if (!e) { message = "Нерешённых нет."; renderTop(); return; }
+  const el = document.getElementById("e-" + e.key);
+  if (el) { el.scrollIntoView({behavior: "smooth", block: "start"}); const inp = el.querySelector("button.opt"); if (inp) inp.focus({preventScroll: true}); }
+}
+
+function renderTop() {
+  const top = document.getElementById("top");
+  const done = doneCount();
+  const fileInput = h("input", {type: "file", accept: "application/json,.json", class: "hidden", onchange: onLoadFile});
+  const th = theme();
+  top.replaceChildren(
+    h("div", {class: "grow"},
+      h("div", {}, h("b", {}, "Решено " + done + " из " + ENTRIES.length),
+        h("span", {class: "small muted"}, saveOk ? " · сохраняется в этом браузере" : " · автосохранение недоступно, скачивайте файл")),
+      h("div", {class: "bar"}, h("div", {style: "width:" + (ENTRIES.length ? 100 * done / ENTRIES.length : 0) + "%"})),
+      message ? h("div", {class: "msg " + (done === ENTRIES.length ? "ok" : "warn")}, message) : null),
+    h("button", {class: "btn", onclick: nextOpen}, "Следующий нерешённый"),
+    h("select", {class: "btn", "aria-label": "Показывать", onchange: ev => { filter = ev.target.value; renderMain(); }},
+      h("option", {value: "all", selected: filter === "all"}, "Все"),
+      h("option", {value: "open", selected: filter === "open"}, "Только нерешённые")),
+    h("button", {class: "btn", title: "Тема: авто, светлая, тёмная", onclick: () => {
+      const next = {auto: "light", light: "dark", dark: "auto"}[theme()] || "auto";
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* ignore */ }
+      applyTheme(next); renderTop(); }}, "Тема: " + ({auto: "авто", light: "светлая", dark: "тёмная"}[th] || "авто")),
+    h("button", {class: "btn", onclick: () => fileInput.click()}, "Загрузить decisions.json"), fileInput,
+    h("button", {class: "btn", onclick: onCopy}, "Скопировать JSON"),
+    h("button", {class: "btn primary", id: "download", onclick: onDownload}, "Скачать decisions.json"));
+}
+
+function intro() {
+  const kinds = {relation: 0, cross_field: 0};
+  ENTRIES.forEach(e => { kinds[e.kind] = (kinds[e.kind] || 0) + 1; });
+  return h("div", {},
+    h("h1", {}, "Разбор расхождений квиза"),
+    h("p", {}, "Расхождений: " + ENTRIES.length + " (отношение: " + kinds.relation + ", другая область: " + kinds.cross_field + "). " +
+      "Для каждого выберите значение и напишите причину одной строкой. Инструмент ничего не решает сам: пара, где оба ответа совпали, здесь не показана."),
+    h("details", {class: "panel"}, h("summary", {}, "Как читать эту страницу"),
+      h("p", {}, "Текст утверждения, скелет, элементы схемы и пары цитат подготовлены моделью (" + (DATA.items[0] && DATA.items[0].prefill_by || "модель") + ") как черновик. Цитаты проверены скриптом на дословность по кэшированным текстам; соответствие цитаты элементу людьми не проверено. Проверяйте по ссылкам."),
+      h("p", {}, "Комментарии разметчиков вставлены ими самими; часть написана вне страницы квиза (eval/benchmark/v0/quiz/returned/README.md). Утверждения из комментариев проверяйте по источникам."),
+      h("p", {}, "«Исключить пару» убирает пару из меток (labels.json: excluded_pairs). При сомнении между двумя отношениями берите нижнее: ложное «уже сделано» дороже всех ошибок."),
+      h("p", {}, "Решения сохраняются в этом браузере (ключ по хешу шаблона). В конце нажмите «Скачать decisions.json» и запустите apply."),
+      relTable()),
+    h("p", {class: "small muted"}, "Шаблон " + String(DEC.template_hash).slice(0, 12) + " · разбирает " + DEC.adjudicator));
+}
+
+function readingBox(r, kind) {
+  return h("div", {class: "reading"},
+    h("div", {class: "who"}, "Разметчик " + r.annotator),
+    h("div", {class: "val"}, vname(r.value), r.value && kind === "relation" ? h("span", {class: "mono muted"}, " " + r.value) : null),
+    r.other_text ? h("div", {class: "small"}, h("b", {}, "Свой ответ: "), r.other_text) : null,
+    r.comment ? h("div", {class: "comment"}, r.comment) : h("div", {class: "small muted"}, "без комментария"));
+}
+
+function entryCard(e) {
+  const s = state[e.key];
+  const card = h("div", {class: "entry" + (isDone(e) ? " done" : ""), id: "e-" + e.key});
+  const status = h("span", {class: "status"});
+  const setStatus = () => {
+    const d = isDone(e);
+    card.className = "entry" + (d ? " done" : "");
+    status.className = "status " + (d ? "ok" : "warn");
+    status.textContent = d ? "решено" : (s.decision ? "нужна причина" : "не решено");
+  };
+  const readValues = e.readings.map(r => r.value);
+  const opts = h("div", {class: "opts", role: "group", "aria-label": "Решение"}, e.allowed.map(v => h("button", {
+    type: "button", class: "opt" + (v === "exclude" ? " ex" : "") + (readValues.includes(v) ? " read" : ""),
+    "aria-pressed": s.decision === v ? "true" : "false", "data-value": v,
+    title: (NAMES[v] && NAMES[v][1]) || "",
+    onclick: ev => {
+      s.decision = s.decision === v ? "" : v; save();
+      opts.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.value === s.decision ? "true" : "false"));
+      setStatus(); renderTop();
+    }}, (NAMES[v] && NAMES[v][0]) || v, e.kind === "relation" ? h("span", {class: "k"}, v) : null)));
+  const reason = h("input", {type: "text", value: s.reason, placeholder: "Причина одной строкой (обязательно)", "aria-label": "Причина",
+    oninput: ev => { s.reason = ev.target.value; save(); setStatus(); renderTop(); }});
+  card.append(
+    h("div", {class: "entry-head"},
+      h("span", {class: "what"}, e.kind === "relation" ? "Отношение" : "Ранняя работа из другой области?"),
+      h("span", {class: "mono muted"}, e.key), status),
+    h("div", {class: "readings"}, e.readings.map(r => readingBox(r, e.kind))),
+    h("div", {class: "small muted"}, "Пунктиром отмечены значения, которые дали разметчики."),
+    opts, reason);
+  setStatus();
+  return card;
+}
+
+function evidenceBlock(item, cand) {
+  if (!cand.evidence.length) return h("p", {class: "small muted"}, "Пар цитат нет (открытого текста кандидата не было).");
+  const chart = {};
+  item.claim.chart.forEach(c => { chart[c.id] = c.text; });
+  return h("details", {},
+    h("summary", {}, "Пары цитат по элементам (" + cand.evidence.length + "), подобраны моделью " + (item.prefill_by || "") + ", не людьми"),
+    cand.evidence.map(ev => h("div", {},
+      h("div", {class: "element"}, h("span", {class: "eid"}, ev.element), chart[ev.element] || "", ev.general_form ? h("span", {class: "small muted"}, " · общий вид") : null),
+      h("div", {class: "pair"},
+        h("div", {class: "quote"}, h("div", {class: "colhead"}, "Утверждение"), ev.quote_claim, h("span", {class: "loc"}, ev.location_claim || "")),
+        h("div", {class: "quote c"}, h("div", {class: "colhead"}, "Кандидат"), ev.quote_candidate, h("span", {class: "loc"}, [ev.location_candidate, levelText(ev)].filter(Boolean).join(" · ")))))));
+}
+
+function renderMain() {
+  const app = document.getElementById("app");
+  app.replaceChildren(intro());
+  DATA.items.forEach(item => {
+    const mine = ENTRIES.filter(e => e.item === item.id);
+    const shown = filter === "open" ? mine.filter(e => !isDone(e)) : mine;
+    if (!shown.length) return;
+    const sec = h("section", {class: "item", id: "item-" + item.id},
+      h("h2", {}, item.id, h("span", {class: "small muted"}, " · " + [item.batch, "дата утверждения " + item.claim.date, item.claim.field].filter(Boolean).join(" · "))),
+      h("div", {class: "panel"},
+        h("div", {class: "label"}, "Утверждение (черновик модели)"), h("div", {}, item.claim.text),
+        h("div", {class: "label", style: "margin-top:8px"}, "Элементы схемы"),
+        h("ol", {class: "chart"}, item.claim.chart.map(c => h("li", {}, h("span", {class: "eid"}, c.id), c.text))),
+        item.claim.skeleton ? h("details", {}, h("summary", {class: "small"}, "Скелет"), h("p", {class: "small"}, item.claim.skeleton)) : null,
+        h("div", {class: "small muted", style: "margin-top:6px"}, "Источник: " + (item.source.title || "") + (workLine(item.source) ? " · " + workLine(item.source) : "")),
+        linkRow(item.source)));
+    item.candidates.forEach(cand => {
+      const ce = shown.filter(e => e.candidate === cand.cid);
+      if (!ce.length) return;
+      const w = cand.work;
+      sec.append(h("div", {class: "cand"},
+        h("div", {class: "label"}, "Кандидат " + cand.cid),
+        h("div", {class: "work-title"}, w.title || "(без названия)"),
+        h("div", {class: "small"}, workLine(w)),
+        w.field ? h("div", {class: "small muted"}, "Область по OpenAlex (только подсказка): " + w.field) : null,
+        linkRow(w),
+        evidenceBlock(item, cand),
+        ce.map(entryCard)));
+    });
+    app.append(sec);
+  });
+  if (filter === "open" && doneCount() === ENTRIES.length) app.append(h("p", {class: "ok"}, "Все расхождения решены. Скачайте decisions.json."));
+}
+function renderAll() { renderTop(); renderMain(); }
+
+applyTheme(theme());
+load();
+renderAll();
+})();
+</script>
+</body>
+</html>

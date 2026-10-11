@@ -1,0 +1,2018 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- No external requests: everything is inline. connect-src 'self' only serves ?batch=<url> on the same server. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<link rel="icon" href="data:,">
+<title>Coelacanth annotation</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0e0e0f;
+  --fg: #e8e8e6;
+  --muted: #a6a6a2;
+  --faint: #74746f;
+  --line: #262628;
+  --line-strong: #3b3b3e;
+  --accent: #f97316;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #fbfbfa;
+  --fg: #1c1c1b;
+  --muted: #5b5b58;
+  --faint: #86867f;
+  --line: #e3e3df;
+  --line-strong: #c9c9c4;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.5 var(--font); }
+body { height: 100vh; display: flex; flex-direction: column; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--line-strong); text-underline-offset: 2px; }
+a:hover { text-decoration-color: var(--fg); }
+button { font: inherit; font-size: 13px; color: var(--fg); background: transparent; border: 1px solid var(--line-strong);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--fg); }
+button:disabled { opacity: .4; cursor: default; }
+button.strong { border-color: var(--fg); }
+button.link { border: 0; padding: 0 2px; text-decoration: underline; text-decoration-color: var(--line-strong); color: var(--muted); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+input[type=checkbox], input[type=radio] { accent-color: var(--fg); margin: 0 4px 0 0; vertical-align: -2px; }
+textarea, input[type=text], input[type=number] { font: inherit; color: var(--fg); background: transparent;
+  border: 1px solid var(--line-strong); border-radius: 6px; padding: 6px 8px; width: 100%; }
+textarea { resize: vertical; min-height: 4.6em; line-height: 1.5; }
+textarea:focus, input[type=text]:focus, input[type=number]:focus { outline: none; border-color: var(--fg); }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; }
+.mono { font-family: var(--mono); font-size: 12.5px; }
+.muted { color: var(--muted); }
+.faint { color: var(--faint); }
+.small { font-size: 12px; }
+p { margin: 6px 0; }
+
+header.top { border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 10px 14px; padding: 8px 16px;
+  flex-wrap: wrap; }
+header.top .brand { font-weight: 600; letter-spacing: .01em; }
+header.top .spacer { flex: 1; }
+#progress { display: flex; align-items: center; gap: 8px; }
+.bar { width: 120px; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--fg); }
+
+.layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 270px minmax(0, 1fr); }
+nav#sidebar { overflow: auto; border-right: 1px solid var(--line); }
+main { overflow: auto; padding: 18px 28px 80px; }
+.main-inner { max-width: 1180px; }
+body.no-batch .layout { grid-template-columns: minmax(0, 1fr); }
+body.no-batch nav#sidebar { display: none; }
+body.dragging main { outline: 2px dashed var(--accent); outline-offset: -8px; }
+@media (max-width: 900px) {
+  body { height: auto; display: block; }
+  .layout { display: block; }
+  nav#sidebar { max-height: 35vh; border-right: 0; border-bottom: 1px solid var(--line); }
+  main { overflow: visible; padding: 14px 16px 60px; }
+}
+
+.side-head { padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.item-link { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+  border-left: 2px solid transparent; border-radius: 0; padding: 8px 14px 8px 12px; }
+.item-link:hover:not(:disabled) { border-color: var(--line); border-left-color: var(--line-strong); }
+.item-link.current, .item-link.current:hover:not(:disabled) { border-left-color: var(--accent); }
+.item-link .row1 { display: flex; justify-content: space-between; gap: 8px; }
+.item-link .snippet { color: var(--muted); font-size: 12px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; }
+.st-done { color: var(--fg); }
+.st-problem { color: var(--accent); }
+
+section.block { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+h1 { font-size: 18px; margin: 0 0 6px; font-weight: 600; }
+h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+h3 { font-size: 14px; margin: 0; font-weight: 600; }
+.row { display: flex; align-items: center; gap: 8px 12px; flex-wrap: wrap; }
+.row.between { justify-content: space-between; }
+.badge { display: inline-block; font-size: 11px; line-height: 1; padding: 3px 6px; border-radius: 4px;
+  border: 1px solid var(--line-strong); color: var(--muted); vertical-align: 1px; white-space: nowrap; }
+.badge.draft { border-style: dashed; }
+.badge.edited { color: var(--fg); border-color: var(--fg); }
+.badge.mark { color: var(--accent); border-color: var(--accent); }
+
+.item-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.item-meta { display: flex; align-items: center; gap: 8px 18px; flex-wrap: wrap; margin-top: 8px; }
+.item-meta input.minutes { width: 80px; padding: 3px 6px; }
+.verdict b { font-family: var(--mono); font-size: 13px; }
+.warn-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.warn-list li { border-left: 2px solid var(--accent); padding: 1px 0 1px 10px; margin: 4px 0; }
+.warn-list.soft li { border-left-color: var(--line-strong); }
+.okline { color: var(--muted); }
+
+.kv { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 4px 12px; margin: 4px 0 10px; }
+.kv > .k { color: var(--muted); }
+.field { margin: 12px 0; }
+.field .row { margin-bottom: 4px; }
+.restore { margin-left: auto; }
+
+table { border-collapse: collapse; width: 100%; }
+th, td { border-bottom: 1px solid var(--line); padding: 6px 6px; text-align: left; vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 12px; }
+td.c, th.c { text-align: center; width: 84px; }
+table.chart td.id { width: 44px; }
+table.chart td.keycell { width: 150px; white-space: nowrap; }
+table.chart input[type=text] { padding: 4px 6px; }
+
+.cands { display: block; }
+.cands.side { display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 14px; align-items: start; }
+.cand { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin: 14px 0; }
+.cands.side .cand { margin: 0; }
+.cand.focused { border-color: var(--accent); }
+.cand:focus, h1[tabindex]:focus { outline: none; }
+.cand-head .title { font-weight: 600; }
+.sub { margin: 14px 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+.ev-group { margin: 8px 0 4px; }
+.ev-group > .eltitle { font-size: 13px; }
+.ev { border-top: 1px solid var(--line); padding: 8px 0 6px; }
+.ev-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; }
+.ev-head label { margin-left: auto; color: var(--muted); cursor: pointer; }
+.ev.rejected .quotes { opacity: .45; text-decoration: line-through; }
+.quotes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px 16px; margin-top: 4px; }
+.quotes .loc { font-size: 12px; color: var(--faint); }
+blockquote { margin: 2px 0 0; padding-left: 10px; border-left: 2px solid var(--line-strong); }
+.rel { display: grid; grid-template-columns: auto auto minmax(0, 1fr); gap: 0 8px; align-items: baseline; padding: 3px 0; cursor: pointer; }
+.rel .name { font-family: var(--mono); font-size: 12.5px; }
+.rel .def { color: var(--muted); }
+kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line-strong); border-radius: 3px; padding: 0 4px; color: var(--muted); }
+.opts { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px 12px; align-items: baseline; margin-top: 10px; }
+.opts > .k { color: var(--muted); }
+.opts label { margin-right: 14px; cursor: pointer; white-space: nowrap; }
+.hint { color: var(--faint); font-size: 12px; margin-top: 2px; }
+.draftnote { border-left: 2px dashed var(--line-strong); padding-left: 10px; color: var(--muted); }
+
+select { font: inherit; font-size: 13px; color: var(--fg); background: var(--bg); border: 1px solid var(--line-strong);
+  border-radius: 6px; padding: 3px 6px; max-width: 100%; }
+select:focus { outline: none; border-color: var(--fg); }
+.ev.mine textarea { min-height: 3.2em; margin-bottom: 4px; }
+.ev.mine input[type=text] { padding: 4px 6px; font-size: 13px; }
+.ev-head.mine-head label { margin-left: 0; color: var(--muted); }
+.ev-head .push { margin-left: auto; }
+.workform { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px 12px; align-items: center; margin: 10px 0 4px; }
+.workform .k { color: var(--muted); }
+.workform input.year { max-width: 90px; }
+.row.nowrap { flex-wrap: nowrap; }
+.row.nowrap input { flex: 1; min-width: 0; }
+.dropped { margin: 8px 0 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.title, .kv > span, blockquote, .draftnote { overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .workform { grid-template-columns: minmax(0, 1fr); }
+  td.c, th.c { width: auto; padding: 6px 3px; }
+  td, th { overflow-wrap: anywhere; }
+  section.block, .cand { padding: 12px 10px; }
+}
+.loader .drop { border: 1px dashed var(--line-strong); border-radius: 8px; padding: 22px; text-align: center; color: var(--muted); }
+.error { color: var(--accent); }
+details summary { cursor: pointer; color: var(--muted); }
+details ul { margin: 6px 0; padding-left: 18px; }
+.foot { display: flex; justify-content: space-between; margin-top: 18px; }
+details.method-text pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 6px 0 0; }
+</style>
+</head>
+<body class="no-batch">
+<header class="top">
+  <span class="brand">Coelacanth annotation</span>
+  <span id="batchName" class="mono muted"></span>
+  <span id="progress"></span>
+  <span class="spacer"></span>
+  <span id="saveStatus" class="faint small"></span>
+  <span id="annotatorBox"></span>
+  <button id="btnLoad" type="button">Load batch</button>
+  <button id="btnImport" type="button" disabled>Import labels</button>
+  <button id="btnExport" type="button" class="strong" disabled>Export labels</button>
+  <button id="btnTheme" type="button">Light</button>
+  <input id="importFile" type="file" accept=".json,application/json" hidden>
+</header>
+<div class="layout">
+  <nav id="sidebar" aria-label="Items"></nav>
+  <main id="main"><noscript>This tool needs JavaScript.</noscript></main>
+</div>
+<script>
+(function () {
+"use strict";
+
+// CORE-BEGIN: pure functions, no DOM. They mirror src/coelacanth/benchmark/annotation.py (labels format v2,
+// _label_item_problems and labels_problems) and items.py (derive_verdict, rules 2, 5 and 6 of validate) so the live
+// warnings match what `python -m coelacanth.benchmark.annotation check-labels` reports. tools/test_annotate.mjs runs
+// this section in Node.
+const BATCH_FORMAT = "coelacanth-batch/v1";
+const META_FORMAT = "coelacanth-batch-meta/v1";
+const LABELS_FORMAT_V1 = "coelacanth-labels/v1";
+const LABELS_FORMAT = "coelacanth-labels/v2";
+const LABELS_FORMATS = [LABELS_FORMAT_V1, LABELS_FORMAT];
+const STATE_FORMAT = "coelacanth-annotate-state/v2";
+const STATE_FORMATS = ["coelacanth-annotate-state/v1", STATE_FORMAT];
+const LEGACY_FORMATS = [LABELS_FORMAT_V1, STATE_FORMATS[0]]; // written before bare packets existed (copyMismatch)
+const RELATIONS = ["equivalent", "specialization", "generalization", "partial", "similar_mechanism", "different"];
+const PRECEDENCE = RELATIONS.slice(0, 5);
+const ALREADY_DONE = ["equivalent", "specialization"];
+const ATTRIBUTIONS = ["cited", "not_cited", "unknown"];
+const LABEL_STATUSES = ["done", "skipped"];
+const PREFILL_STATUSES = ["draft", "none"]; // a packet's prefill.status: pre-filled or bare
+const ELEMENT_LISTS = ["covered_elements", "analogous_elements", "restricted_elements"];
+const TEXT_LEVELS = ["full_text", "abstract"];
+const WORK_IDS = ["openalex", "doi", "arxiv", "pmid"];
+const EVIDENCE_FIELDS = ["element", "quote_candidate", "quote_claim", "location_candidate", "location_claim",
+                         "text_level", "general_form"];
+const MAX_CLAIM_WORDS = 120;
+const MAX_QUOTE_WORDS = 40;
+// Packet charts hold e1 to e6, so an added element never takes a packet element's id; the working state also keeps
+// the next free number (`next`), so an id removed in this browser is not given to another element.
+const ADDED_ELEMENT_FROM = 7;
+const ELEMENT_ID_RE = /^e[1-9]\d*$/;
+const ADDED_CID_RE = /^a[1-9]\d*$/;
+const ANNOTATOR_RE = /^[\p{L}\p{N}_-]+$/u;
+const TYPED_ID_RES = {doi: /^10\.\d{4,9}\/\S+$/, openalex: /^W\d+$/,
+                      arxiv: /^(?:\d{4}\.\d{4,5}|[a-z-]+(?:\.[A-Za-z-]+)?\/\d{7})$/, pmid: /^\d+$/};
+const ID_PREFIXES = {doi: ["https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/", "doi:"],
+                     openalex: ["https://openalex.org/"], arxiv: ["https://arxiv.org/abs/", "http://arxiv.org/abs/", "arxiv:"],
+                     pmid: ["https://pubmed.ncbi.nlm.nih.gov/", "pmid:"]};
+const ID_NAMES = {doi: "a DOI (10.xxxx/...)", openalex: "an OpenAlex work ID (W...)", arxiv: "an arXiv ID (2101.00001)",
+                  pmid: "a PubMed ID (digits)"};
+const STOPWORDS = new Set(("a an and are as at be by for from in into is it its of on or that the their this to " +
+  "under was were with").split(" "));
+const YEAR_CUE_RE = /\b(?:in|since|from|until|till|before|after|by|circa|year|years|early|late|mid)\s+((?:1[6-9]|20)\d\d)\b|\b((?:1[6-9]|20)\d\d)s\b|\(((?:1[6-9]|20)\d\d)\)/gi;
+// Python reprs of the tuples check-labels prints
+const REPR = {statuses: "('done', 'skipped')", attributions: "('cited', 'not_cited', 'unknown')",
+              levels: "('full_text', 'abstract')", formats: "('coelacanth-labels/v1', 'coelacanth-labels/v2')"};
+
+const isObj = v => v !== null && typeof v === "object" && !Array.isArray(v);
+const isNum = v => typeof v === "number" && Number.isFinite(v);
+const arrEq = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+const sortStr = xs => xs.map(String).sort();
+const filled = v => v !== null && v !== undefined && v !== "";
+const nWords = text => String(text).split(/\s+/).filter(Boolean).length;
+
+/** Python-style repr, so messages read like the ones check-labels prints. */
+function pyRepr(v) {
+  if (v === null || v === undefined) return "None";
+  if (v === true) return "True";
+  if (v === false) return "False";
+  if (typeof v === "string") return "'" + v.replace(/\\/g, "\\\\").replace(/'/g, "\\'") + "'";
+  if (Array.isArray(v)) return "[" + v.map(pyRepr).join(", ") + "]";
+  if (typeof v === "number") return String(v);
+  return JSON.stringify(v);
+}
+
+/** items.derive_verdict: the strongest judged relation by precedence, or nothing_close. */
+function deriveVerdict(candidates) {
+  const judged = new Set((candidates || []).map(c => c.relation));
+  return PRECEDENCE.find(r => judged.has(r)) || "nothing_close";
+}
+
+/** annotation.key_level */
+function keyLevel(key) {
+  if (!key) return null;
+  if (["oa-", "arxivabs-"].some(p => key.startsWith(p))) return "abstract";
+  if (["arxiv-", "pmc-", "aio-", "pdf-"].some(p => key.startsWith(p))) return "full_text";
+  return null;
+}
+
+const isBare = packet => ((packet && packet.prefill) || {}).status === "none";
+
+/** annotation.norm_id: a work identifier in one comparable form, or null when it does not look like one of its kind. */
+function normId(kind, value) {
+  if (!(typeof value === "string" || Number.isInteger(value))) return null;
+  let v = String(value).trim();
+  for (const prefix of ID_PREFIXES[kind]) if (v.toLowerCase().startsWith(prefix)) { v = v.slice(prefix.length); break; }
+  v = v.trim().replace(/\/+$/, "");
+  if (kind === "doi") v = v.toLowerCase();
+  else if (kind === "openalex") v = v.toUpperCase();
+  else if (kind === "arxiv") v = v.replace(/v\d+$/, "");
+  return TYPED_ID_RES[kind].test(v) ? v : null;
+}
+function workIds(work) {
+  const out = [];
+  for (const kind of WORK_IDS) { const n = normId(kind, (work || {})[kind]); if (n) out.push(`${kind}:${n}`); }
+  return out;
+}
+/** annotation.first_added_element: e7 on a packet with a chart, e1 on a bare packet. */
+function firstAddedElement(packet) {
+  const chart = ((packet && packet.claim) || {}).chart || [];
+  if (!chart.length) return 1;
+  const numbers = chart.filter(e => typeof e.id === "string" && ELEMENT_ID_RE.test(e.id)).map(e => Number(e.id.slice(1)));
+  return Math.max(ADDED_ELEMENT_FROM, ...numbers.map(n => n + 1));
+}
+function knownWorks(packet) {
+  const claim = packet.claim || {};
+  const known = new Map(workIds(claim.source_work || {}).map(k => [k, "the source work"]));
+  for (const pc of packet.candidates || []) for (const k of workIds(pc.work || {})) if (!known.has(k)) known.set(k, `candidate ${pc.cid}`);
+  return known;
+}
+
+/** annotation._evidence_problems: an evidence entry an annotator added. */
+function evidenceProblems(ev, where, chartIds, abstractOnly, done) {
+  if (!isObj(ev)) return [`${where}: must be an object with ${EVIDENCE_FIELDS.join(", ")}`];
+  const out = [];
+  const element = ev.element;
+  if (!filled(element)) { if (done) out.push(`${where}: no element`); }
+  else if (!chartIds.includes(element)) out.push(`${where}: element ${pyRepr(element)} is not in the chart`);
+  for (const field of ["quote_candidate", "quote_claim", "location_candidate", "location_claim"]) {
+    const value = ev[field];
+    if (value != null && typeof value !== "string") out.push(`${where}: ${field} must be text`);
+    else if (!(value || "").trim()) { if (done) out.push(`${where}: ${field} is ${field.startsWith("quote") ? "empty" : "missing"}`); }
+    else if (field.startsWith("quote") && nWords(value) > MAX_QUOTE_WORDS) {
+      out.push(`${where}: ${field} has ${nWords(value)} words; the limit is ${MAX_QUOTE_WORDS}`);
+    }
+  }
+  const level = ev.text_level ?? null;
+  if ((level === null && done) || (level !== null && !TEXT_LEVELS.includes(level))) out.push(`${where}: text_level must be one of ${REPR.levels}`);
+  else if (level !== null && abstractOnly && level !== "abstract") {
+    out.push(`${where}: text_level must be 'abstract' when a quote comes from an abstract-only text`);
+  }
+  const general = ev.general_form ?? null;
+  if ((general === null && done) || (general !== null && typeof general !== "boolean")) out.push(`${where}: general_form must be true or false`);
+  return out;
+}
+
+/** annotation._relation_problems: the relation and element lists of one candidate. */
+function relationProblems(cand, where, done, chartIds) {
+  const out = [];
+  const relation = cand.relation ?? null;
+  if (relation === null) {
+    if (done) out.push(`${where}: no relation (every candidate of a done item needs one)`);
+  } else if (!RELATIONS.includes(relation)) {
+    out.push(`${where}: relation ${pyRepr(relation)} is not one of the six labels`);
+  }
+  const sets = {};
+  for (const name of ELEMENT_LISTS) {
+    let value = cand[name] ?? [];
+    if (!Array.isArray(value)) { out.push(`${where}: ${name} must be a list`); value = []; }
+    const unknown = sortStr([...new Set(value)].filter(v => !chartIds.includes(v)));
+    if (unknown.length) out.push(`${where}: ${name} ${pyRepr(unknown)} are not in the chart`);
+    sets[name] = new Set(value);
+  }
+  const both = sortStr([...sets.covered_elements].filter(x => sets.analogous_elements.has(x)));
+  if (both.length) out.push(`${where}: elements ${pyRepr(both)} are marked both covered and analogous`);
+  return {out, sets};
+}
+
+/** annotation._judgement_problems: attribution, cross-field, confidence and what each relation requires. */
+function judgementProblems(cand, where, done, sets, keyIds, kept) {
+  const out = [];
+  const relation = cand.relation ?? null;
+  const attribution = cand.attribution ?? null, crossField = cand.cross_field ?? null, confidence = cand.confidence ?? null;
+  if ((attribution === null && done) || (attribution !== null && !ATTRIBUTIONS.includes(attribution))) {
+    out.push(`${where}: attribution must be one of ${REPR.attributions}`);
+  }
+  if ((crossField === null && done) || (crossField !== null && typeof crossField !== "boolean")) {
+    out.push(`${where}: cross_field must be true or false`);
+  }
+  const validConfidence = isNum(confidence) && [1, 2, 3].includes(confidence);
+  if ((confidence === null && done) || (confidence !== null && !validConfidence)) out.push(`${where}: confidence must be 1, 2 or 3`);
+  if (kept.some(ev => isObj(ev) && ev.text_level === "abstract") && validConfidence && confidence > 2) {
+    out.push(`${where}: abstract-only evidence allows confidence at most 2 (reject that evidence or lower it)`);
+  }
+  if (!done) return out;
+  const covered = sets.covered_elements, analogous = sets.analogous_elements, restricted = sets.restricted_elements;
+  const coveredKey = sortStr([...covered].filter(x => keyIds.has(x)));
+  const uncoveredKey = sortStr([...keyIds].filter(x => !covered.has(x)));
+  if (relation === "partial" && !(coveredKey.length >= 2 && uncoveredKey.length)) {
+    out.push(`${where} (partial): needs at least two covered key elements and one uncovered, ` +
+             `covers ${pyRepr(coveredKey)} of ${pyRepr(sortStr([...keyIds]))}`);
+  }
+  if (relation === "equivalent" && uncoveredKey.length) out.push(`${where} (equivalent): key elements not covered: ${pyRepr(uncoveredKey)}`);
+  if (relation === "specialization" && restricted.size === 0) out.push(`${where} (specialization): no restricted element`);
+  // LABELING.md clarification 1: at least one key element corresponds by role only
+  if (relation === "similar_mechanism" && ![...analogous].some(x => keyIds.has(x))) {
+    out.push(`${where} (similar_mechanism): no analogous key element`);
+  }
+  const noCounterpart = sortStr([...keyIds].filter(x => !covered.has(x) && !analogous.has(x)));
+  if (relation === "similar_mechanism" && noCounterpart.length) {
+    out.push(`${where} (similar_mechanism): key elements without a counterpart: ${pyRepr(noCounterpart)} ` +
+             `(LABELING.md clarification 1: then the pair is different)`);
+  }
+  return out;
+}
+
+/** annotation._typed_work_problems: an added candidate's work as typed. `known` receives this work's identifiers. */
+function typedWorkProblems(work, where, done, claimDate, known) {
+  if (!isObj(work)) return [`${where}: work is missing`];
+  const out = [], ids = [];
+  const typed = WORK_IDS.filter(k => filled(work[k]));
+  for (const kind of typed) {
+    const n = normId(kind, work[kind]);
+    if (n === null) out.push(`${where}: ${kind} ${pyRepr(work[kind])} does not look like ${ID_NAMES[kind]}`);
+    else ids.push(`${kind}:${n}`);
+  }
+  if (!typed.length && done) out.push(`${where}: work needs one of the identifiers ${WORK_IDS.join(", ")}`);
+  for (const field of ["title", "first_author", "field"]) {
+    const value = work[field];
+    if (value != null && typeof value !== "string") out.push(`${where}: work ${field.replace("_", " ")} must be text`);
+    else if (done && !(value || "").trim()) out.push(`${where}: work has no ${field.replace("_", " ")}`);
+  }
+  const year = work.year ?? null;
+  if (year === null) { if (done) out.push(`${where}: work has no year`); }
+  else if (!Number.isInteger(year)) out.push(`${where}: work year must be a whole number, got ${pyRepr(year)}`);
+  else if (claimDate && year > Number(claimDate.slice(0, 4))) out.push(`${where}: year ${year} is after the claim date ${claimDate} (rule 6)`);
+  const same = [...new Set(ids.filter(k => known.has(k)).map(k => known.get(k)))].sort();
+  if (same.length) out.push(`${where}: the same work as ${same.join(", ")}`);
+  for (const k of ids) if (!known.has(k)) known.set(k, where);
+  return out;
+}
+
+/** annotation._label_item_problems: one labelled item against its packet; `v2` allows chart edits, added evidence
+ * and added candidates. */
+function labelItemProblems(packet, item, v2 = true) {
+  const out = [];
+  const status = item.status;
+  if (!LABEL_STATUSES.includes(status)) out.push(`status must be one of ${REPR.statuses}, got ${pyRepr(status)}`);
+  const done = status === "done";
+  const minutes = item.minutes;
+  if (done && !(isNum(minutes) && minutes > 0)) out.push(`minutes must be a number above 0, got ${pyRepr(minutes)}`);
+  else if (minutes != null && !(isNum(minutes) && minutes >= 0)) out.push(`minutes must be a number, got ${pyRepr(minutes)}`);
+
+  const pclaim = packet.claim || {};
+  const bare = isBare(packet);
+  if (v2) { // the copy the labels were made on: pre-filled labels must never pass on a bare packet, nor the reverse
+    const madeOn = item.prefill_status ?? null;
+    if (!PREFILL_STATUSES.includes(madeOn)) {
+      out.push(`prefill_status must be 'draft' or 'none' (the copy the labels were made on), got ${pyRepr(madeOn)}`);
+    } else if (madeOn !== (packet.prefill || {}).status) {
+      out.push(`prefill_status ${pyRepr(madeOn)} but the packet is ${bare ? "bare" : "pre-filled"} (labels made on another copy of the batch)`);
+    }
+  }
+  const claim = item.claim;
+  if (!isObj(claim)) { out.push("claim is missing"); return out; }
+  if (done) {
+    for (const f of ["text", "skeleton"]) {
+      if (typeof claim[f] !== "string" || !claim[f].trim()) out.push(`claim.${f} is empty`);
+    }
+  }
+  const differs = (claim.text ?? null) !== (pclaim.text ?? null);
+  if (typeof item.text_edited !== "boolean") out.push("text_edited must be true or false");
+  else if (item.text_edited !== differs) {
+    out.push(`text_edited is ${item.text_edited} but claim.text ${differs ? "differs from" : "equals"} the pre-fill`);
+  }
+  const packetIds = (pclaim.chart || []).map(e => e.id);
+  let chart = Array.isArray(claim.chart) ? claim.chart : [];
+  if (chart.some(e => !isObj(e))) { out.push("claim.chart has an element that is not an object"); chart = chart.filter(isObj); }
+  const chartIds = chart.map(e => e.id);
+  if (!v2) {
+    if (!arrEq(chartIds, packetIds)) {
+      out.push(`claim.chart ids ${pyRepr(chartIds)} differ from the packet's ${pyRepr(packetIds)} (texts may be edited, ids not)`);
+    }
+  } else {
+    const repeated = [...new Set(chartIds.filter((id, n) => chartIds.indexOf(id) !== n).map(String))].sort();
+    if (repeated.length) out.push(`claim.chart ids repeat: ${pyRepr(repeated)}`);
+    const start = firstAddedElement(packet);
+    const strange = chartIds.filter(id => !packetIds.includes(id) &&
+      !(typeof id === "string" && ELEMENT_ID_RE.test(id) && Number(id.slice(1)) >= start));
+    if (strange.length) {
+      out.push(`claim.chart ids ${pyRepr(strange)} are neither packet elements nor new ids (added elements take e${start} onwards)`);
+    }
+    if (done && !(chart.length >= 2 && chart.length <= 6)) out.push(`claim.chart needs two to six elements, has ${chart.length}`);
+  }
+  for (const e of chart) {
+    if (e.key != null && typeof e.key !== "boolean") out.push(`claim.chart ${e.id}: key must be true or false`);
+    else if (done && e.key == null) out.push(`claim.chart ${e.id}: key must be true or false`);
+    if (done && !(typeof e.text === "string" && e.text.trim())) out.push(`claim.chart ${e.id}: element text is empty`);
+  }
+  const keyIds = new Set(chart.filter(e => e.key === true).map(e => e.id));
+  if (done && keyIds.size === 0) out.push("claim.chart has no key element");
+  const names = claim.coined_names;
+  if (bare) {
+    if (names == null) { if (done) out.push("claim.coined_names is missing (the source work's coined names; the list may be empty)"); }
+    else if (!(Array.isArray(names) && names.every(n => typeof n === "string" && n.trim()))) out.push("claim.coined_names must be a list of names");
+  } else if (names != null && !(Array.isArray(names) && arrEq(names, pclaim.coined_names || []))) {
+    out.push("claim.coined_names differ from the packet's: only a bare packet's coined names are typed");
+  }
+
+  const sourceLevel = keyLevel((pclaim.source_work || {}).cache_key);
+  const packetCands = new Map((packet.candidates || []).map(c => [c.cid, c]));
+  const cands = item.candidates;
+  if (!Array.isArray(cands)) { out.push("candidates must be a list"); return out; }
+  const cids = cands.map(c => c.cid);
+  if (new Set(cids).size !== cids.length) out.push(`candidate cids repeat: ${pyRepr(cids)}`);
+  for (const cid of cids) if (!packetCands.has(cid)) out.push(`candidate ${pyRepr(cid)} is not in the packet`);
+  if (done) for (const cid of packetCands.keys()) if (!cids.includes(cid)) out.push(`candidate ${cid}: not labelled`);
+  for (const cand of cands) {
+    const cid = cand.cid;
+    if (!packetCands.has(cid)) continue;
+    const where = `candidate ${cid}`;
+    const rel = relationProblems(cand, where, done, chartIds);
+    out.push(...rel.out);
+    const evidence = packetCands.get(cid).evidence || [];
+    let rejected = cand.rejected_evidence ?? [];
+    if (!Array.isArray(rejected) || !rejected.every(n => Number.isInteger(n) && n >= 0 && n < evidence.length)) {
+      out.push(`${where}: rejected_evidence must list indices of the packet's ${evidence.length} evidence entries`);
+      rejected = [];
+    } else if (new Set(rejected).size !== rejected.length) {
+      out.push(`${where}: rejected_evidence repeats an index`);
+    }
+    const rejectedSet = new Set(rejected);
+    let kept = evidence.filter((ev, n) => !rejectedSet.has(n));
+    if (done) {
+      evidence.forEach((ev, n) => {
+        if (!rejectedSet.has(n) && !chartIds.includes(ev.element)) {
+          out.push(`${where}: pre-filled evidence #${n + 1} is for ${ev.element}, which is not in the chart (reject it)`);
+        }
+      });
+    }
+    const added = cand.added_evidence;
+    if (added != null && !v2) out.push(`${where}: added_evidence needs labels format ${LABELS_FORMAT}`);
+    else if (added != null && !Array.isArray(added)) out.push(`${where}: added_evidence must be a list`);
+    else if (added && added.length) {
+      const abstractOnly = sourceLevel === "abstract" || keyLevel((packetCands.get(cid).work || {}).cache_key) === "abstract";
+      added.forEach((ev, n) => out.push(...evidenceProblems(ev, `${where} added evidence ${n + 1}`, chartIds, abstractOnly, done)));
+      kept = kept.concat(added.filter(isObj));
+    }
+    out.push(...judgementProblems(cand, where, done, rel.sets, keyIds, kept));
+  }
+
+  let addedCands = item.added_candidates;
+  if (addedCands != null && !v2) { out.push(`added_candidates needs labels format ${LABELS_FORMAT}`); addedCands = []; }
+  else if (addedCands != null && !Array.isArray(addedCands)) { out.push("added_candidates must be a list"); addedCands = []; }
+  if ((addedCands || []).some(a => !isObj(a))) out.push("added_candidates holds an entry that is not an object");
+  addedCands = (addedCands || []).filter(isObj);
+  const acids = addedCands.map(a => a.cid ?? null);
+  if (new Set(acids.map(String)).size !== acids.length || !acids.every(c => typeof c === "string" && ADDED_CID_RE.test(c))) {
+    out.push(`added candidate cids must be unique and look like a1, a2, ..., got ${pyRepr(acids)}`);
+  }
+  const known = knownWorks(packet);
+  const claimDate = isDate(pclaim.date) ? pclaim.date : null;
+  for (const cand of addedCands) {
+    const where = `candidate ${cand.cid}`;
+    out.push(...typedWorkProblems(cand.work, where, done, claimDate, known));
+    const rel = relationProblems(cand, where, done, chartIds);
+    out.push(...rel.out);
+    let evidence = cand.evidence ?? [];
+    if (!Array.isArray(evidence)) { out.push(`${where}: evidence must be a list`); evidence = []; }
+    evidence.forEach((ev, n) => out.push(...evidenceProblems(ev, `${where} evidence ${n + 1}`, chartIds, sourceLevel === "abstract", done)));
+    out.push(...judgementProblems(cand, where, done, rel.sets, keyIds, evidence));
+  }
+
+  const derived = deriveVerdict(cands.concat(addedCands));
+  if ((done || item.verdict != null) && item.verdict !== derived) {
+    out.push(`stored verdict ${pyRepr(item.verdict ?? null)} differs from the derived verdict ${pyRepr(derived)}`);
+  }
+  return out;
+}
+
+/** annotation.labels_problems: a whole labels file against its batch. */
+function labelsProblems(batch, labels) {
+  const out = [];
+  if (!LABELS_FORMATS.includes(labels.format)) out.push(`format must be one of ${REPR.formats}, got ${pyRepr(labels.format)}`);
+  const v2 = labels.format !== LABELS_FORMAT_V1;
+  if (labels.batch !== batch.batch) out.push(`labels are for batch ${pyRepr(labels.batch)}, not ${pyRepr(batch.batch)}`);
+  const annotator = labels.annotator;
+  if (typeof annotator !== "string" || !ANNOTATOR_RE.test(annotator)) {
+    out.push(`annotator must be an ID such as a1, got ${pyRepr(annotator)}`);
+  }
+  if (batch.annotator != null && annotator !== batch.annotator) {
+    out.push(`this batch file is the copy for annotator ${batch.annotator}; these labels are by ${pyRepr(annotator)}`);
+  }
+  const items = labels.items;
+  if (!Array.isArray(items)) { out.push("items must be a list"); return out; }
+  const packets = new Map((batch.items || []).map(p => [p.id, p]));
+  const ids = items.map(i => i.id);
+  if (new Set(ids).size !== ids.length) out.push("item ids repeat");
+  for (const id of ids) if (!packets.has(id)) out.push(`item ${pyRepr(id)} is not in batch ${pyRepr(batch.batch)}`);
+  for (const id of packets.keys()) if (!ids.includes(id)) out.push(`item ${id} of the batch is missing (export it as skipped)`);
+  for (const item of items) {
+    const packet = packets.get(item.id);
+    if (packet) for (const p of labelItemProblems(packet, item, v2)) out.push(`${item.id}: ${p}`);
+  }
+  return out;
+}
+
+const SINGLE_QUOTES = /[‘’‚‛′]/g, DOUBLE_QUOTES = /[“”„″]/g;
+const DASHES = /[‐-―−]/g, DROPPED = /[\u00AD\u200B\uFEFF]/g; // soft hyphen, zero-width space, BOM, as escapes
+/** quotes.normalize */
+function normalizeText(text) {
+  return String(text).normalize("NFKC").replace(SINGLE_QUOTES, "'").replace(DOUBLE_QUOTES, '"')
+    .replace(DASHES, "-").replace(DROPPED, "").replace(/\s+/g, " ").trim();
+}
+const words = text => normalizeText(text).toLowerCase().match(/[\p{L}\p{N}]+/gu) || [];
+const escapeRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const wordRe = (s, flags) => new RegExp(`(?<![\\p{L}\\p{N}_])${escapeRe(s)}(?![\\p{L}\\p{N}_])`, "u" + (flags || ""));
+const isDate = v => typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) && !Number.isNaN(Date.parse(v));
+const isUpper = t => t !== t.toLowerCase() && t === t.toUpperCase();
+
+/** items._surname: 'Hoerl', 'Hoerl, Arthur E.', 'Arthur E. Hoerl' and 'Hoerl AE' all give 'Hoerl'. */
+function surname(author) {
+  if (!author) return null;
+  if (author.includes(",")) return author.split(",")[0].trim() || null;
+  const tokens = author.split(/\s+/).filter(Boolean)
+    .filter(t => !(isUpper(t) && t.replace(/\.+$/, "").length <= 3) && !t.endsWith("."));
+  return tokens.length ? tokens[tokens.length - 1] : null;
+}
+
+/** items.claim_text_problems (rule 5, script part) on the merged claim: names, title words, years, coined names.
+ * `works` are the merged candidates' works, packet candidates first, then the added ones as typed. */
+function claimTextProblems(source, works, coined, text, skeleton) {
+  const out = [];
+  source = source || {};
+  const authors = [[source.first_author || "", "the source's first author"]];
+  works.forEach((w, i) => authors.push([(w || {}).first_author || "", `candidate ${i}'s first author`]));
+  for (const [author, whose] of authors) {
+    const name = surname(typeof author === "string" ? author : "");
+    if (name && wordRe(name).test(text)) out.push(`claim.text contains ${whose} surname ${pyRepr(name)}`);
+  }
+  const textWords = words(text);
+  const textGrams = new Set();
+  for (let i = 0; i + 2 < textWords.length; i++) textGrams.add(textWords.slice(i, i + 3).join(" "));
+  const titleWords = words(source.title || "");
+  const shared = new Set();
+  for (let i = 0; i + 2 < titleWords.length; i++) {
+    const gram = titleWords.slice(i, i + 3);
+    if (gram.some(w => !STOPWORDS.has(w)) && textGrams.has(gram.join(" "))) shared.add(gram.join(" "));
+  }
+  if (shared.size) out.push(`claim.text repeats three consecutive title words: ${pyRepr([...shared].sort())}`);
+  const years = new Set();
+  for (const w of [source, ...works.map(x => x || {})]) {
+    if (Number.isInteger(w.year)) years.add(String(w.year));
+    if (isDate(w.publication_date)) years.add(w.publication_date.slice(0, 4));
+  }
+  const found = new Set([...years].filter(y => new RegExp(`(?<![\\d.,])${y}(?![\\d.,]*\\d)`).test(text)));
+  for (const m of text.matchAll(YEAR_CUE_RE)) found.add(m[1] || m[2] || m[3]);
+  if (found.size) out.push(`claim.text contains a year: ${pyRepr([...found].sort())}`);
+  for (const name of coined || []) {
+    if (name && wordRe(name, "i").test(text)) out.push(`claim.text contains the coined name ${pyRepr(name)}`);
+  }
+  if (!skeleton) out.push("claim.skeleton is missing");
+  else if (normalizeText(skeleton).toLowerCase() === normalizeText(text).toLowerCase()) out.push("claim.skeleton repeats claim.text");
+  return out;
+}
+
+/** What merge() makes of an item's candidates: packet candidates with their kept pre-filled and added evidence, then
+ * the added candidates with their typed works. */
+function mergedCandidates(packet, item) {
+  const packetCands = new Map((packet.candidates || []).map(c => [c.cid, c]));
+  const labelled = new Map((item.candidates || []).filter(isObj).map(c => [c.cid, c]));
+  const out = [];
+  for (const pc of packet.candidates || []) {
+    const cand = labelled.get(pc.cid);
+    if (!cand) continue;
+    const rejected = new Set(cand.rejected_evidence || []);
+    const added = Array.isArray(cand.added_evidence) ? cand.added_evidence.filter(isObj) : [];
+    out.push({cand, work: pc.work || {}, evidence: (pc.evidence || []).filter((ev, n) => !rejected.has(n)).concat(added)});
+  }
+  for (const cand of Array.isArray(item.added_candidates) ? item.added_candidates.filter(isObj) : []) {
+    if (packetCands.has(cand.cid)) continue;
+    out.push({cand, work: isObj(cand.work) ? cand.work : {}, evidence: Array.isArray(cand.evidence) ? cand.evidence.filter(isObj) : []});
+  }
+  return out;
+}
+
+/** What check-labels also reports after merging a done item (items.validate rules 0, 2, 5 and, for added candidates
+ * by their typed year, 6); quotes are checked by check-labels against the cached texts. */
+function loaderProblems(packet, item) {
+  const out = [];
+  const chart = Array.isArray(item.claim.chart) ? item.claim.chart.filter(isObj) : [];
+  const keyIds = new Set(chart.filter(e => e.key === true).map(e => e.id));
+  const merged = mergedCandidates(packet, item);
+  for (const {cand, evidence} of merged) {
+    if (!cand.relation) continue;
+    const withEvidence = new Set(evidence.map(ev => ev.element));
+    const where = `candidate ${cand.cid} (${cand.relation})`;
+    if (["equivalent", "specialization", "generalization", "partial", "similar_mechanism"].includes(cand.relation)) {
+      const missing = sortStr((cand.covered_elements || []).filter(x => keyIds.has(x) && !withEvidence.has(x)));
+      if (missing.length) out.push(`rule 2: ${where}: covered key elements without evidence: ${pyRepr(missing)}`);
+    }
+    if (cand.relation === "specialization") {
+      const general = new Set(evidence.filter(ev => ev.general_form === true).map(ev => ev.element));
+      const missing = sortStr((cand.restricted_elements || []).filter(x => !general.has(x)));
+      if (missing.length) out.push(`rule 2: ${where}: no general-form quote for ${pyRepr(missing)}`);
+    }
+    if (cand.relation === "similar_mechanism") {
+      const missing = sortStr((cand.analogous_elements || []).filter(x => !withEvidence.has(x)));
+      if (missing.length) out.push(`rule 2: ${where}: analogous elements without evidence: ${pyRepr(missing)}`);
+    }
+  }
+  const claimDate = (packet.claim || {}).date;
+  for (const {cand, work} of merged) {
+    if (!ADDED_CID_RE.test(String(cand.cid)) || !isDate(claimDate) || work.year !== Number(claimDate.slice(0, 4))) continue;
+    out.push(`rule 6: candidate ${cand.cid}: year ${work.year} is not clearly before the claim date ${claimDate}; ` +
+             "check-labels needs its publication date");
+  }
+  // Quotes added against a text nobody could cache: check-labels rejects every one ("no cache_key").
+  const quoted = (list, field) => (Array.isArray(list) ? list : []).filter(ev => isObj(ev) && typeof ev[field] === "string" && ev[field].trim()).length;
+  const pairs = n => `${n} quote pair${n === 1 ? "" : "s"}`;
+  let claimQuotes = 0;
+  for (const c of Array.isArray(item.candidates) ? item.candidates.filter(isObj) : []) {
+    const pc = (packet.candidates || []).find(x => x.cid === c.cid);
+    if (!pc) continue;
+    claimQuotes += quoted(c.added_evidence, "quote_claim");
+    const n = quoted(c.added_evidence, "quote_candidate");
+    if (n && !(pc.work || {}).cache_key) {
+      out.push(`rule 4: candidate ${c.cid}: no text of this candidate is cached, so check-labels cannot verify the candidate quotes of your ${pairs(n)}; tell Damir, who may cache an open copy`);
+    }
+  }
+  for (const a of Array.isArray(item.added_candidates) ? item.added_candidates.filter(isObj) : []) claimQuotes += quoted(a.evidence, "quote_claim");
+  if (claimQuotes && !(((packet.claim || {}).source_work) || {}).cache_key) {
+    out.push(`rule 4: no text of the claim source is cached, so check-labels cannot verify the claim quotes of your ${pairs(claimQuotes)}; tell Damir, who may cache an open copy`);
+  }
+  const text = item.claim.text || "";
+  const n = nWords(text);
+  if (n > MAX_CLAIM_WORDS) out.push(`rule 0: claim.text has ${n} words; the limit is ${MAX_CLAIM_WORDS}`);
+  const coined = isBare(packet) ? item.claim.coined_names : (packet.claim || {}).coined_names;
+  for (const p of claimTextProblems((packet.claim || {}).source_work, merged.map(m => m.work), coined, text, item.claim.skeleton)) {
+    out.push(`rule 5: ${p}`);
+  }
+  return out;
+}
+
+const freshEvidence = () => ({element: "", quote_candidate: "", quote_claim: "", location_candidate: "",
+                              location_claim: "", text_level: null, general_form: false});
+const freshLabels = () => ({relation: null, covered: [], analogous: [], restricted: [], attribution: null,
+                            cross_field: null, confidence: null, note: "", ev: []});
+const freshAdded = cid => Object.assign({cid, work: {kind: "doi", id: "", title: "", year: "", first_author: "", field: ""}},
+                                        freshLabels());
+const parseNames = raw => String(raw || "").split(/[,;]/).map(s => s.trim()).filter(Boolean);
+
+/** Fresh working state of one item: the pre-fill as drafts, no label chosen. `order` lists the chart's element ids;
+ * `next` is the number the next added element takes. */
+function freshItemState(packet) {
+  const claim = packet.claim || {};
+  return {
+    seconds: 0, done: false, notes: "",
+    text: claim.text ?? "", skeleton: claim.skeleton ?? "", coined: "",
+    order: (claim.chart || []).map(e => e.id),
+    chart: Object.fromEntries((claim.chart || []).map(e => [e.id, {text: e.text ?? "", key: null}])),
+    next: firstAddedElement(packet),
+    cands: Object.fromEntries((packet.candidates || []).map(c => [c.cid, Object.assign(freshLabels(), {rejected: []})])),
+    added: [],
+  };
+}
+
+function exportEvidence(ev) {
+  const text = v => typeof v === "string" ? v.trim() : v;
+  return {element: ev.element || null, quote_candidate: text(ev.quote_candidate), quote_claim: text(ev.quote_claim),
+          location_candidate: text(ev.location_candidate), location_claim: text(ev.location_claim),
+          text_level: ev.text_level, general_form: ev.general_form};
+}
+function exportWork(w) {
+  const year = String(w.year ?? "").trim();
+  return {[w.kind]: w.id.trim(), title: w.title.trim(), year: /^\d{1,4}$/.test(year) ? Number(year) : (year || null),
+          first_author: w.first_author.trim(), field: w.field.trim()};
+}
+
+/** One item in labels format v2 (annotation.py docstring); the verdict is always the derived one. */
+function exportItem(packet, st) {
+  const ordered = list => st.order.filter(id => list.includes(id));
+  const labelsOf = c => ({relation: c.relation, covered_elements: ordered(c.covered), analogous_elements: ordered(c.analogous),
+                          restricted_elements: ordered(c.restricted), attribution: c.attribution, cross_field: c.cross_field,
+                          confidence: c.confidence});
+  const candidates = (packet.candidates || []).map(pc => {
+    const c = st.cands[pc.cid];
+    return Object.assign({cid: pc.cid}, labelsOf(c), {rejected_evidence: [...c.rejected].sort((a, b) => a - b),
+                         added_evidence: c.ev.map(exportEvidence), note: c.note});
+  });
+  const added = st.added.map(a => Object.assign({cid: a.cid, work: exportWork(a.work), evidence: a.ev.map(exportEvidence)},
+                                                labelsOf(a), {note: a.note}));
+  const claim = {text: st.text, skeleton: st.skeleton,
+                 chart: st.order.map(id => ({id, text: st.chart[id].text, key: st.chart[id].key}))};
+  if (isBare(packet)) claim.coined_names = parseNames(st.coined);
+  return {
+    id: packet.id,
+    minutes: Math.round(st.seconds / 6) / 10,
+    claim,
+    text_edited: st.text !== packet.claim.text,
+    candidates,
+    added_candidates: added,
+    verdict: deriveVerdict(candidates.concat(added)),
+    status: st.done ? "done" : "skipped",
+    prefill_status: (packet.prefill || {}).status ?? null,
+    notes: st.notes,
+  };
+}
+
+/** Why labels saved or imported for an item must not be loaded into this copy of it, or null when they fit: they
+ * were made on a pre-filled copy and this one has the item bare, or the other way round (decision 25's crossover
+ * compares the two), or they do not say which copy they come from. `legacy` marks a file whose format predates bare
+ * packets (LEGACY_FORMATS: v1 labels, the first tool's saved work): its items come from pre-filled copies. */
+function copyMismatch(packet, li, legacy = false) {
+  const here = (packet.prefill || {}).status ?? null;
+  const madeOn = isObj(li) ? li.prefill_status ?? null : null;
+  const kind = s => (s === "none" ? "bare" : "pre-filled");
+  if (madeOn === null) {
+    if (legacy && !isBare(packet)) return null;
+    return `${packet.id}: the labels do not say which copy they were made on${isBare(packet) ? ", and this copy has the item bare" : ""}.`;
+  }
+  return madeOn === here ? null : `${packet.id}: the labels were made on a ${kind(madeOn)} copy, and this copy has the item ${kind(here)}.`;
+}
+
+function importEvidence(ev) {
+  const out = freshEvidence();
+  if (!isObj(ev)) return out;
+  for (const f of ["element", "quote_candidate", "quote_claim", "location_candidate", "location_claim"]) {
+    if (typeof ev[f] === "string") out[f] = ev[f];
+  }
+  if (TEXT_LEVELS.includes(ev.text_level)) out.text_level = ev.text_level;
+  if (typeof ev.general_form === "boolean") out.general_form = ev.general_form;
+  return out;
+}
+function applyLabels(target, c, chartIds) {
+  if (RELATIONS.includes(c.relation)) target.relation = c.relation;
+  for (const [from, to] of [["covered_elements", "covered"], ["analogous_elements", "analogous"], ["restricted_elements", "restricted"]]) {
+    if (Array.isArray(c[from])) target[to] = chartIds.filter(id => c[from].includes(id));
+  }
+  if (ATTRIBUTIONS.includes(c.attribution)) target.attribution = c.attribution;
+  if (typeof c.cross_field === "boolean") target.cross_field = c.cross_field;
+  if ([1, 2, 3].includes(c.confidence)) target.confidence = c.confidence;
+  if (typeof c.note === "string") target.note = c.note;
+}
+
+/** Working state from a labels-format item (v1 or v2: an imported file, or what autosave stored); unknown values are
+ * dropped. Labels made on another copy of the item (copyMismatch) give the fresh state: nothing of them is kept. */
+function stateFromLabelItem(packet, li, legacy = false) {
+  const st = freshItemState(packet);
+  if (!isObj(li) || copyMismatch(packet, li, legacy)) return st;
+  if (isNum(li.seconds) && li.seconds >= 0) st.seconds = li.seconds;
+  else if (isNum(li.minutes) && li.minutes >= 0) st.seconds = li.minutes * 60;
+  st.done = li.status === "done";
+  if (typeof li.notes === "string") st.notes = li.notes;
+  const claim = isObj(li.claim) ? li.claim : {};
+  if (typeof claim.text === "string") st.text = claim.text;
+  if (typeof claim.skeleton === "string") st.skeleton = claim.skeleton;
+  if (Array.isArray(claim.coined_names)) st.coined = claim.coined_names.filter(n => typeof n === "string").join(", ");
+  if (Array.isArray(claim.chart)) {
+    const packetIds = st.order.slice(), start = firstAddedElement(packet);
+    const order = [], chart = {};
+    for (const e of claim.chart) {
+      if (!isObj(e) || typeof e.id !== "string" || chart[e.id]) continue;
+      const fromPacket = packetIds.includes(e.id);
+      if (!fromPacket && !(ELEMENT_ID_RE.test(e.id) && Number(e.id.slice(1)) >= start)) continue;
+      order.push(e.id);
+      chart[e.id] = {text: typeof e.text === "string" ? e.text : (fromPacket ? st.chart[e.id].text : ""),
+                     key: typeof e.key === "boolean" ? e.key : null};
+    }
+    st.order = order;
+    st.chart = chart;
+    const added = order.filter(id => !packetIds.includes(id)).map(id => Number(id.slice(1)) + 1);
+    st.next = Math.max(st.next, ...added, Number.isInteger(li.next_element) ? li.next_element : 0);
+  }
+  for (const c of Array.isArray(li.candidates) ? li.candidates : []) {
+    const sc = isObj(c) && st.cands[c.cid];
+    if (!sc) continue;
+    const pc = packet.candidates.find(x => x.cid === c.cid);
+    const nEvidence = (pc.evidence || []).length;
+    applyLabels(sc, c, st.order);
+    if (Array.isArray(c.rejected_evidence)) {
+      sc.rejected = [...new Set(c.rejected_evidence.filter(n => Number.isInteger(n) && n >= 0 && n < nEvidence))];
+    }
+    if (Array.isArray(c.added_evidence)) sc.ev = c.added_evidence.map(importEvidence);
+  }
+  for (const a of Array.isArray(li.added_candidates) ? li.added_candidates : []) {
+    if (!isObj(a) || typeof a.cid !== "string" || !ADDED_CID_RE.test(a.cid) || st.added.some(x => x.cid === a.cid)) continue;
+    const sa = freshAdded(a.cid);
+    const w = isObj(a.work) ? a.work : {};
+    const kind = ["doi", "openalex", "arxiv", "pmid"].find(k => filled(w[k])) || "doi";
+    const str = v => typeof v === "string" ? v : "";
+    sa.work = {kind, id: filled(w[kind]) ? String(w[kind]) : "", title: str(w.title), year: filled(w.year) ? String(w.year) : "",
+               first_author: str(w.first_author), field: str(w.field)};
+    applyLabels(sa, a, st.order);
+    if (Array.isArray(a.evidence)) sa.ev = a.evidence.map(importEvidence);
+    st.added.push(sa);
+  }
+  return st;
+}
+
+/** A batch file must at least have this shape for the tool to show it. */
+function batchShapeProblems(batch) {
+  const out = [];
+  if (!isObj(batch)) return ["not a JSON object"];
+  if (batch.format !== BATCH_FORMAT) out.push(`format must be ${BATCH_FORMAT}, got ${pyRepr(batch.format)}`);
+  if (typeof batch.batch !== "string" || !batch.batch) out.push("batch name is missing");
+  if (!Array.isArray(batch.items) || !batch.items.length) { out.push("items must be a non-empty list"); return out; }
+  const ids = new Set();
+  batch.items.forEach((p, n) => {
+    const where = `item ${n + 1}`;
+    if (!isObj(p) || typeof p.id !== "string") { out.push(`${where}: id is missing`); return; }
+    if (ids.has(p.id)) out.push(`${p.id}: id repeats`);
+    ids.add(p.id);
+    if (!isObj(p.claim) || !Array.isArray(p.claim.chart)) out.push(`${p.id}: claim.chart is missing`);
+    else if (p.claim.chart.some(e => !isObj(e) || typeof e.id !== "string")) out.push(`${p.id}: a chart element has no id`);
+    if (!Array.isArray(p.candidates)) out.push(`${p.id}: candidates must be a list`);
+    else if (p.candidates.some(c => !isObj(c) || typeof c.cid !== "string")) out.push(`${p.id}: a candidate has no cid`);
+  });
+  return out;
+}
+
+const Core = {BATCH_FORMAT, META_FORMAT, LABELS_FORMAT, LABELS_FORMAT_V1, STATE_FORMAT, RELATIONS, deriveVerdict,
+              labelItemProblems, labelsProblems, loaderProblems, claimTextProblems, freshItemState, freshEvidence,
+              freshAdded, exportItem, stateFromLabelItem, copyMismatch, batchShapeProblems, pyRepr, normId,
+              firstAddedElement, isBare, keyLevel, parseNames};
+// CORE-END
+
+// ---------------------------------------------------------------------------------------------------------------
+// UI
+
+const REL_DEFS = {
+  equivalent: "up to renaming, notation and routine reformulation, the candidate states the same mechanism or result " +
+              "under the same hypotheses; every key element is covered with the same meaning.",
+  specialization: "the claim is a strict particular case of the candidate: restricting the candidate (fixing a " +
+                  "parameter, adding a hypothesis) yields the claim with the same meaning.",
+  generalization: "the candidate is a special case of the claim: fixing a parameter of the claim or adding a " +
+                  "hypothesis to it gives the candidate. A candidate that just lacks a step or a property the claim " +
+                  "proves is partial or lower.",
+  partial: "the candidate covers at least two key elements with the same meaning, and at least one key element is " +
+           "not covered.",
+  similar_mechanism: "the same functional mechanism or form, but in a different system or with a different meaning " +
+                     "of the variables; neither statement implies the other.",
+  different: "does not reach similar_mechanism: fewer than two key elements covered with the same meaning, and not " +
+             "every key element has a counterpart (often a false friend sharing vocabulary or topic).",
+};
+const KEY_GUIDE = "Usually key: the method's steps, the conditions and assumptions the claim needs, a property it " +
+                  "proves or states (a guarantee, a bound), its purpose. Usually not key: a check or demonstration of " +
+                  "the result (a comparison, an example run), the setting where it was observed, an element that " +
+                  "follows from another element, unless it is the result the claim states.";
+const IDLE_MS = 10 * 60 * 1000;
+const ANNOTATOR_INPUT_RE = /^[A-Za-z0-9_-]{1,32}$/;
+const KEYS = {
+  theme: "coelacanth.annotate.theme",
+  annotator: "coelacanth.annotate.annotator",
+  layout: "coelacanth.annotate.layout",
+  last: "coelacanth.annotate.lastBatch",
+  batch: name => `coelacanth.annotate.batch.${name}`,
+  labels: (name, a) => `coelacanth.annotate.labels.${name}.${a}`,
+};
+/** What browser storage is keyed by: the batch, or for an annotator's copy (crossover) the batch and that annotator,
+ * so work on b02.json and on b02-a1.json is kept apart. */
+const copyName = batch => (batch.annotator != null ? `${batch.batch}-${batch.annotator}` : batch.batch);
+const store = {
+  get(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { window.localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+};
+
+const S = {batch: null, annotator: null, items: {}, currentId: null, focusCid: null, layout: "stacked",
+           view: "loader", loaderMessage: "", lastInput: Date.now(), minutesEditing: false, saveTimer: null,
+           saveOk: true, timerState: "", notices: []}; // notices: labels kept out of this copy (copyMismatch)
+let R = null; // references into the rendered item, for refresh()
+let SB = {};  // sidebar entries by item id
+
+const $ = sel => document.querySelector(sel);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v == null || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "dataset") Object.assign(el.dataset, v);
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "value" || k === "checked" || k === "indeterminate") el[k] = v;
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) el.append(kid instanceof Node ? kid : String(kid));
+  return el;
+}
+// replaceChildren turns null into the text "null"; fill drops empty children first
+function fill(el, ...kids) { el.replaceChildren(...kids.flat(Infinity).filter(k => k != null && k !== false)); }
+const badge = (text, kind, title) => h("span", {class: "badge" + (kind ? " " + kind : ""), title}, text);
+// Badges are drawn for the current item: the tooltip names its pre-fill's author (prefill.by: a model, or annotator:<id>
+// on a contrast item, whose claim another annotator wrote).
+function draftBadge(text) {
+  const p = currentPacket();
+  const by = p && p.prefill && typeof p.prefill.by === "string" && p.prefill.by ? p.prefill.by : null;
+  return badge(text || "draft", "draft", `Pre-filled${by ? " by " + by : ""}. A draft: check it against the source.`);
+}
+
+function safeUrl(url) { return typeof url === "string" && /^https?:\/\//i.test(url) ? url : null; }
+function workLinks(w) {
+  const links = [];
+  if (w.doi) links.push(["doi", "https://doi.org/" + String(w.doi).replace(/^https?:\/\/(dx\.)?doi\.org\//i, "")]);
+  if (w.arxiv) links.push(["arXiv", "https://arxiv.org/abs/" + w.arxiv]);
+  if (w.pmid) links.push(["PubMed", `https://pubmed.ncbi.nlm.nih.gov/${w.pmid}/`]);
+  if (w.openalex) links.push(["OpenAlex", "https://openalex.org/" + String(w.openalex).replace(/^https?:\/\/openalex\.org\//i, "")]);
+  if (safeUrl(w.oa_url)) links.push(["open access", w.oa_url]);
+  return links;
+}
+const extLink = (text, url) => h("a", {href: url, target: "_blank", rel: "noopener noreferrer"}, text);
+function workBlock(w) {
+  w = w || {};
+  const links = workLinks(w);
+  const title = w.title || "(no title)";
+  const date = w.publication_date || w.year;
+  const meta = [w.first_author, w.n_authors > 1 ? `${w.n_authors} authors` : null, date, w.venue].filter(Boolean).join(", ");
+  return h("div", null,
+    h("div", {class: "title"}, links.length ? extLink(title, links[0][1]) : title),
+    h("div", {class: "muted small"}, meta || "no author or date recorded",
+      w.ai_origin ? [" ", badge(`AI-origin method ${w.ai_origin}`)] : null),
+    h("div", {class: "faint small"},
+      links.map(([label, url], i) => [i ? ", " : "", extLink(label, url)]),
+      w.cache_key ? [links.length ? ". " : "", "Cached text: ", h("span", {class: "mono"}, w.cache_key)] : null),
+    w.method_text ? h("details", {class: "method-text"},
+      h("summary", null, "Text of the generated method (this is the source to read)"),
+      h("pre", {class: "small"}, w.method_text)) : null);
+}
+
+// ---- storage ----
+function labelsKey() { return KEYS.labels(copyName(S.batch), S.annotator); }
+function persistNow() {
+  clearTimeout(S.saveTimer);
+  S.saveTimer = null;
+  if (!S.batch || !S.annotator) return;
+  const items = S.batch.items.map(p => Object.assign(exportItem(p, S.items[p.id]),
+                                                     {seconds: S.items[p.id].seconds, next_element: S.items[p.id].next}));
+  const state = {format: STATE_FORMAT, batch: S.batch.batch, annotator: S.annotator, saved_at: new Date().toISOString(),
+                 current: S.currentId, items};
+  S.saveOk = store.set(labelsKey(), JSON.stringify(state));
+  showSaveStatus();
+}
+function persistSoon() { clearTimeout(S.saveTimer); S.saveTimer = setTimeout(persistNow, 400); }
+function showSaveStatus() {
+  const el = $("#saveStatus");
+  if (!S.batch) { el.textContent = ""; return; }
+  el.textContent = S.saveOk ? "Saved in this browser" : "Autosave unavailable: export often";
+  el.className = S.saveOk ? "faint small" : "error small";
+}
+function restoreItems() {
+  S.items = {};
+  let saved = null;
+  try { saved = JSON.parse(store.get(labelsKey()) || "null"); } catch (e) { saved = null; }
+  const byId = new Map((saved && Array.isArray(saved.items) ? saved.items : []).filter(isObj).map(i => [i.id, i]));
+  const legacy = !!saved && LEGACY_FORMATS.includes(saved.format);
+  S.notices = [];
+  for (const p of S.batch.items) {
+    const why = byId.has(p.id) ? copyMismatch(p, byId.get(p.id), legacy) : null;
+    if (why) S.notices.push(`Not restored from this browser: ${why}`);
+    S.items[p.id] = byId.has(p.id) ? stateFromLabelItem(p, byId.get(p.id), legacy) : freshItemState(p);
+  }
+  const ids = S.batch.items.map(p => p.id);
+  S.currentId = saved && ids.includes(saved.current) ? saved.current : ids[0];
+  S.focusCid = null;
+}
+
+// ---- loading ----
+function loadBatch(batch, {annotator} = {}) {
+  const problems = batchShapeProblems(batch);
+  if (problems.length) throw new Error("Not a usable batch file: " + problems.slice(0, 5).join("; "));
+  if (S.batch && S.annotator) persistNow();
+  S.batch = batch;
+  S.notices = [];
+  if (annotator) setAnnotator(annotator);
+  store.set(KEYS.batch(copyName(batch)), JSON.stringify(batch));
+  store.set(KEYS.last, copyName(batch));
+  S.view = "item";
+  if (S.annotator) restoreItems();
+  render();
+  return {loaded: "batch", batch: batch.batch, items: batch.items.length};
+}
+
+function hasProgress() {
+  return Object.values(S.items).some(st => st.done || st.seconds > 0 || st.added.length > 0 ||
+    Object.values(st.cands).some(c => c.relation || c.attribution || c.cross_field != null || c.confidence || c.ev.length));
+}
+
+function importLabels(labels, {interactive}) {
+  if (!S.batch) throw new Error("Load the batch first, then import a labels file for it.");
+  if (labels.batch !== S.batch.batch) {
+    throw new Error(`These labels are for batch ${labels.batch}, but batch ${S.batch.batch} is loaded.`);
+  }
+  if (!Array.isArray(labels.items)) throw new Error("The labels file has no items list.");
+  const who = labels.annotator;
+  if (typeof who !== "string" || !ANNOTATOR_INPUT_RE.test(who)) throw new Error("The labels file has no valid annotator ID.");
+  if (who !== S.annotator) {
+    if (interactive && S.annotator && !window.confirm(`This file holds the labels of annotator ${who}. Switch from ${S.annotator} to ${who}?`)) {
+      return {imported: 0};
+    }
+    if (S.annotator) persistNow();
+    setAnnotator(who);
+    restoreItems();
+  } else if (interactive && hasProgress() &&
+             !window.confirm(`Replace the labels saved in this browser for ${S.batch.batch} (${who}) with the file's?`)) {
+    return {imported: 0};
+  }
+  const packets = new Map(S.batch.items.map(p => [p.id, p]));
+  const legacy = LEGACY_FORMATS.includes(labels.format);
+  let n = 0;
+  const kept = [];
+  for (const li of labels.items) {
+    if (!isObj(li) || !packets.has(li.id)) continue;
+    const why = copyMismatch(packets.get(li.id), li, legacy);
+    if (why) { kept.push(why); continue; } // the item keeps what this copy already holds
+    S.items[li.id] = stateFromLabelItem(packets.get(li.id), li, legacy);
+    n += 1;
+  }
+  S.notices = S.notices.filter(x => !x.startsWith("Not imported")).concat(kept.map(why => `Not imported: ${why}`));
+  S.view = "item";
+  persistNow();
+  render();
+  return {imported: n, not_imported: kept.length, batch: S.batch.batch, annotator: S.annotator};
+}
+
+function loadAny(obj, {interactive}) {
+  if (!isObj(obj)) throw new Error("Not a JSON object.");
+  if (obj.format === BATCH_FORMAT) return loadBatch(obj);
+  if (LABELS_FORMATS.includes(obj.format) || STATE_FORMATS.includes(obj.format)) return importLabels(obj, {interactive});
+  if (obj.format === META_FORMAT) throw new Error("This is the hidden meta file of a batch. Load the batch file itself (b01.json).");
+  throw new Error(`Unknown file format ${pyRepr(obj.format)}: expected a batch (${BATCH_FORMAT}) or labels (${LABELS_FORMAT}).`);
+}
+
+function loadText(text, source) {
+  let obj;
+  try { obj = JSON.parse(text); } catch (e) { return showLoaderError(`${source}: not valid JSON (${e.message}).`); }
+  try { loadAny(obj, {interactive: true}); } catch (e) { showLoaderError(`${source}: ${e.message}`); }
+}
+function readFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => loadText(String(reader.result), file.name);
+  reader.onerror = () => showLoaderError(`${file.name}: could not be read.`);
+  reader.readAsText(file);
+}
+function showLoaderError(message) {
+  if (S.view !== "loader") { S.view = "loader"; }
+  S.loaderMessage = message;
+  render();
+}
+
+function setAnnotator(id) {
+  S.annotator = id;
+  store.set(KEYS.annotator, id);
+}
+
+// ---- export ----
+function exportLabels() {
+  if (!S.batch || !S.annotator) return null;
+  return {format: LABELS_FORMAT, batch: S.batch.batch, annotator: S.annotator, exported_at: new Date().toISOString(),
+          items: S.batch.items.map(p => exportItem(p, S.items[p.id]))};
+}
+function downloadExport() {
+  const labels = exportLabels();
+  if (!labels) return;
+  const problems = labelsProblems(S.batch, labels);
+  if (problems.length && !window.confirm(`${problems.length} problem(s) in done items; check-labels will reject this ` +
+      `file until they are fixed:\n\n${problems.slice(0, 8).join("\n")}${problems.length > 8 ? "\n..." : ""}\n\nExport anyway?`)) {
+    return;
+  }
+  persistNow();
+  const name = `${labels.batch}-${labels.annotator}-labels.json`;
+  const url = URL.createObjectURL(new Blob([JSON.stringify(labels, null, 1) + "\n"], {type: "application/json"}));
+  const a = h("a", {href: url, download: name});
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  $("#saveStatus").textContent = `Exported ${name} at ${new Date().toLocaleTimeString()}`;
+}
+
+// ---- rendering ----
+function render() {
+  document.body.classList.toggle("no-batch", !S.batch || S.view !== "item" || !S.annotator);
+  renderHeader();
+  if (S.view === "loader" || !S.batch) return renderLoader();
+  if (!S.annotator || S.view === "annotator") return renderAnnotatorForm();
+  renderSidebar();
+  renderItem();
+}
+
+function renderHeader() {
+  $("#batchName").textContent = S.batch ? `batch ${S.batch.batch}` : "";
+  $("#btnImport").disabled = !S.batch;
+  $("#btnExport").disabled = !(S.batch && S.annotator);
+  $("#btnLoad").textContent = S.view === "loader" && S.batch ? "Back to batch" : "Load batch";
+  const box = $("#annotatorBox");
+  box.replaceChildren();
+  if (S.annotator) {
+    box.append(h("span", {class: "muted"}, "annotator "), h("span", {class: "mono"}, S.annotator), " ",
+      h("button", {type: "button", class: "link", onclick: () => { persistNow(); S.view = "annotator"; render(); }}, "change"));
+  }
+  updateProgress();
+  showSaveStatus();
+}
+
+function updateProgress() {
+  const el = $("#progress");
+  if (!S.batch || !S.annotator) { el.replaceChildren(); return; }
+  const n = S.batch.items.length;
+  const done = S.batch.items.filter(p => S.items[p.id] && S.items[p.id].done).length;
+  el.replaceChildren(h("span", {class: "bar", title: `${done} of ${n} done`}, h("span", {style: `width:${(100 * done / n).toFixed(1)}%`})),
+    h("span", {class: "small muted"}, `${done} of ${n} done`));
+}
+
+function renderLoader() {
+  const main = $("#main");
+  const fileInput = h("input", {type: "file", accept: ".json,application/json", onchange: e => readFile(e.target.files[0])});
+  const paste = h("textarea", {rows: 6, placeholder: "Paste the batch JSON (or a labels JSON) here", spellcheck: "false"});
+  const proto = window.location.protocol;
+  const param = new URLSearchParams(window.location.search).get("batch");
+  main.replaceChildren(h("div", {class: "main-inner loader"},
+    h("h1", null, "Load a batch"),
+    h("p", {class: "muted"}, "A batch is the JSON file you were given (for example b01.json). Everything stays in this " +
+      "browser: the tool makes no network requests, autosaves your labels locally and exports them as a file."),
+    S.loaderMessage ? h("p", {class: "error"}, S.loaderMessage) : null,
+    param && !/^https?:$/.test(proto) ? h("p", {class: "muted"}, "The ?batch= address works only when this page is served " +
+      "over http (see tools/README.md). Use the file picker instead.") : null,
+    h("section", {class: "block"}, h("h2", null, "From a file"),
+      h("div", {class: "drop"}, h("p", null, "Drop the batch file anywhere on this page, or choose it:"), fileInput)),
+    h("section", {class: "block"}, h("h2", null, "Paste JSON"), paste,
+      h("p", null, h("button", {type: "button", onclick: () => loadText(paste.value, "Pasted JSON")}, "Load pasted JSON"))),
+    S.batch ? h("p", null, h("button", {type: "button", onclick: () => { S.view = "item"; S.loaderMessage = ""; render(); }},
+      `Back to batch ${S.batch.batch}`)) : null,
+    helpBlock()));
+}
+
+function helpBlock() {
+  return h("details", {class: "block", style: "border:1px solid var(--line);border-radius:8px;padding:10px 16px"},
+    h("summary", null, "How labelling works here"),
+    h("ul", null,
+      h("li", null, "Pre-filled fields (claim text, skeleton, chart, quotes, notes, attribution hint) are drafts. Check each against the source; edit the texts if needed. Labels are never pre-selected."),
+      h("li", null, "For every candidate: tick covered, analogous or restricted per element, choose one of the six relations, cross-field, attribution and confidence. Reject a quote pair that is wrong; add one (Add a quote pair) where a quote is missing."),
+      h("li", null, "The chart: edit element texts, remove an element that is not part of the claim, add one that is missing (two to six, at least one key). " + KEY_GUIDE),
+      h("li", null, "Generalization: the candidate is the claim with a parameter fixed or a hypothesis added. Tick covered for the key elements the candidate has with the same meaning, leave the element the restriction removes unticked, and name the restriction in the candidate note. A candidate that just lacks a step or a property the claim proves is partial or lower."),
+      h("li", null, "Search for earlier work yourself and add what you find (Add a candidate you found): identifier, title, year, first author, field, then the same labels and quote pairs as the others."),
+      h("li", null, "Items marked \"no pre-fill\" are bare: write the claim text, skeleton, coined names and chart yourself, and add every quote pair."),
+      h("li", null, "The item verdict is derived from your relations. Warnings show what check-labels would reject."),
+      h("li", null, "Mark the item done when finished. Items not marked done are exported as skipped."),
+      h("li", null, "Minutes count while the item is open, the window is focused and you were active in the last 10 minutes. Add reading time spent in other windows by editing the minutes."),
+      h("li", null, "Keys: 1 to 6 choose a relation for the highlighted candidate, j and k move between candidates, [ and ] move between items."),
+      h("li", null, "Export labels when you stop working and send the file to Damir. Import labels resumes from an exported file.")));
+}
+
+function renderAnnotatorForm() {
+  const main = $("#main");
+  const input = h("input", {type: "text", value: S.annotator || (S.batch && S.batch.annotator) || "", placeholder: "a1", maxlength: "32",
+    "aria-label": "Your annotator ID",
+    style: "max-width:220px", autocomplete: "off", spellcheck: "false"});
+  const err = h("p", {class: "error"});
+  const submit = () => {
+    const id = input.value.trim();
+    if (!ANNOTATOR_INPUT_RE.test(id)) { err.textContent = "Use letters, digits, - or _ only (for example a1)."; return; }
+    if (S.batch && S.annotator && id !== S.annotator) persistNow();
+    setAnnotator(id);
+    if (S.batch) restoreItems();
+    S.view = "item";
+    render();
+  };
+  input.addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+  main.replaceChildren(h("div", {class: "main-inner"},
+    h("h1", null, "Your annotator ID"),
+    h("p", {class: "muted"}, "Enter the ID you were given (for example a1). It goes into the exported file, and the labels " +
+      "saved in this browser are kept per batch and per ID."),
+    h("div", {class: "row"}, input, h("button", {type: "button", class: "strong", onclick: submit}, "Continue"),
+      S.annotator && S.view === "annotator" ? h("button", {type: "button", onclick: () => { S.view = "item"; render(); }}, "Cancel") : null),
+    err));
+  input.focus();
+}
+
+function itemStatus(p) {
+  const st = S.items[p.id];
+  const item = exportItem(p, st);
+  const problems = labelItemProblems(p, Object.assign({}, item, {status: "done"}));
+  const started = st.done || st.text !== p.claim.text || st.added.length > 0 ||
+    !arrEq(st.order, (p.claim.chart || []).map(e => e.id)) || Object.values(st.chart).some(e => e.key !== null) ||
+    Object.values(st.cands).some(c => c.relation || c.attribution || c.cross_field !== null || c.confidence || c.ev.length);
+  return {st, item, problems, started};
+}
+
+function renderSidebar() {
+  const nav = $("#sidebar");
+  const top = nav.scrollTop;
+  SB = {};
+  nav.replaceChildren(h("div", {class: "side-head small muted"}, `${S.batch.items.length} items`),
+    ...S.batch.items.map(p => {
+      const status = h("span", {class: "small"});
+      const minutes = h("span", {class: "small faint"});
+      const btn = h("button", {type: "button", class: "item-link", onclick: () => selectItem(p.id)},
+        h("div", {class: "row1"}, h("span", {class: "mono"}, p.id), status),
+        h("div", {class: "snippet"}, (p.claim && p.claim.text || (isBare(p) ? "No pre-fill: write the claim" : "")).slice(0, 140)),
+        minutes);
+      SB[p.id] = {btn, status, minutes};
+      return btn;
+    }));
+  nav.scrollTop = top;
+  updateSidebar();
+}
+
+function updateSidebar() {
+  for (const p of S.batch.items) {
+    const e = SB[p.id];
+    if (!e) continue;
+    const {st, problems, started} = itemStatus(p);
+    e.btn.classList.toggle("current", p.id === S.currentId);
+    if (st.done) {
+      e.status.textContent = problems.length ? `done, ${problems.length} to fix` : "done";
+      e.status.className = "small " + (problems.length ? "st-problem" : "st-done");
+    } else {
+      e.status.textContent = started ? "in progress" : "not started";
+      e.status.className = "small faint";
+    }
+    e.minutes.textContent = st.seconds > 0 ? `${(st.seconds / 60).toFixed(1)} min` : "";
+  }
+  updateProgress();
+}
+
+function currentPacket() { return S.batch && S.batch.items.find(p => p.id === S.currentId); }
+
+function selectItem(id) {
+  if (!S.items[id]) return;
+  persistNow();
+  S.currentId = id;
+  S.focusCid = null;
+  renderItem();
+  updateSidebar();
+  $("#main").scrollTop = 0;
+  if (SB[id]) SB[id].btn.scrollIntoView({block: "nearest"});
+}
+function go(delta) {
+  const ids = S.batch.items.map(p => p.id);
+  const i = ids.indexOf(S.currentId) + delta;
+  if (i >= 0 && i < ids.length) selectItem(ids[i]);
+}
+
+function onChange() { persistSoon(); refresh(); }
+
+function textField(p, st, field, label, hintText) {
+  const ta = h("textarea", {rows: field === "text" ? 5 : 3, value: st[field], spellcheck: "true", "aria-label": label,
+    placeholder: isBare(p) ? "Nothing pre-filled: write it from the source work" : null,
+    oninput: e => { st[field] = e.target.value; onChange(); }});
+  const status = h("span");
+  const count = field === "text" ? h("span", {class: "small faint"}) : null;
+  const restore = isBare(p) ? null : h("button", {type: "button", class: "restore",
+    onclick: () => { st[field] = p.claim[field] ?? ""; ta.value = st[field]; onChange(); }}, "Restore pre-fill");
+  R.fields[field] = {ta, status, count, restore};
+  return h("div", {class: "field"},
+    h("div", {class: "row"}, h("label", null, h("b", null, label)), status, count, restore),
+    hintText ? h("div", {class: "hint"}, hintText) : null, ta);
+}
+
+function radioRow(name, options, current, onPick, labelPrefix) {
+  return options.map(([value, text]) => h("label", null,
+    h("input", {type: "radio", name, value: String(value), "aria-label": (labelPrefix || "") + String(text),
+                checked: current === value, onchange: () => onPick(value)}), text));
+}
+
+const clip = (text, n = 60) => { const t = String(text || "").trim(); return t.length > n ? t.slice(0, n - 1) + "…" : t; };
+const ID_KIND_NAMES = {doi: "DOI", openalex: "OpenAlex ID", arxiv: "arXiv ID", pmid: "PubMed ID"};
+
+/** Every candidate card of an item: the packet's candidates, then the ones the annotator added. `c` is the working
+ * labels of the candidate; `evidence` its pre-filled quote pairs. */
+function candidateViews(p, st) {
+  return (p.candidates || []).map(pc => ({cid: pc.cid, c: st.cands[pc.cid], work: pc.work || {}, evidence: pc.evidence || [],
+                                          hint: pc.attribution_hint || "none", note: pc.note, added: false}))
+    .concat(st.added.map(a => ({cid: a.cid, c: a, work: null, evidence: [], hint: null, note: null, added: true})));
+}
+const labelsFor = (st, cid) => st.cands[cid] || st.added.find(a => a.cid === cid);
+const allLabels = st => Object.values(st.cands).concat(st.added);
+
+/** One quote pair the annotator adds: element, both quotes with their locations, text level, general form. */
+function evidenceEditor(p, st, view, ev, n) {
+  const cid = view.cid, label = `${cid} quote pair ${n + 1}`;
+  const set = key => e => { ev[key] = e.target.value; onChange(); };
+  const select = h("select", {"aria-label": `${label}: chart element`, onchange: set("element")},
+    h("option", {value: "", selected: !ev.element}, "choose an element"),
+    st.order.map(id => h("option", {value: id, selected: ev.element === id}, `${id}  ${clip(st.chart[id].text, 48)}`)),
+    ev.element && !st.order.includes(ev.element) ? h("option", {value: ev.element, selected: true}, `${ev.element} (not in the chart)`) : null);
+  const area = (key, what) => h("textarea", {rows: 2, value: ev[key], "aria-label": `${label}: ${what}`,
+    placeholder: "Verbatim, at most 40 words", oninput: set(key)});
+  const line = (key, what) => h("input", {type: "text", value: ev[key], "aria-label": `${label}: ${what}`,
+    placeholder: "Location: abstract, section 3, eq. 2", oninput: set(key)});
+  const qcCount = h("span", {class: "small faint"}), qsCount = h("span", {class: "small faint"});
+  const general = h("input", {type: "checkbox", checked: ev.general_form, "aria-label": `${label}: quotes the candidate's general form`,
+    onchange: e => { ev.general_form = e.target.checked; onChange(); }});
+  R.evRefs.push({ev, select, qcCount, qsCount});
+  R.evFocus[`${cid}:${n}`] = select;
+  return h("div", {class: "ev mine"},
+    h("div", {class: "ev-head mine-head"}, h("span", {class: "mono faint"}, `yours #${n + 1}`), select,
+      h("span", {class: "row", style: "gap:2px 10px"}, radioRow(`tl-${p.id}-${cid}-${n}`,
+        [["full_text", "full text"], ["abstract", "abstract only"]], ev.text_level, v => { ev.text_level = v; onChange(); }, `${label}: `)),
+      h("label", {title: "Quotes the candidate's general form (needed for each restricted element)"}, general, "general form"),
+      h("button", {type: "button", class: "link push", "aria-label": `remove ${label}`, onclick: () => removeEvidence(cid, n)}, "remove")),
+    h("div", {class: "quotes"},
+      h("div", null, h("div", {class: "loc"}, "Candidate ", qcCount), area("quote_candidate", "quote from the candidate"),
+        line("location_candidate", "location in the candidate")),
+      h("div", null, h("div", {class: "loc"}, "Claim source ", qsCount), area("quote_claim", "quote from the claim source"),
+        line("location_claim", "location in the claim source"))));
+}
+
+/** The work of a candidate the annotator found, as typed: identifier, title, year, first author, field. */
+function workForm(p, view, ref) {
+  const w = view.c.work, cid = view.cid;
+  const input = (key, label, attrs) => h("input", Object.assign({type: "text", value: w[key], "aria-label": `${cid} ${label}`,
+    autocomplete: "off", oninput: e => { w[key] = e.target.value; onChange(); }}, attrs || {}));
+  const kind = h("select", {"aria-label": `${cid} identifier type`, onchange: e => { w.kind = e.target.value; onChange(); }},
+    Object.entries(ID_KIND_NAMES).map(([v, t]) => h("option", {value: v, selected: w.kind === v}, t)));
+  ref.idInput = input("id", "identifier", {class: "mono", spellcheck: "false",
+    placeholder: "10.1000/xyz123, W2049633694, 2101.00001 or 12345678"});
+  ref.idStatus = h("div", {class: "small"});
+  return h("div", {class: "workform"},
+    h("span", {class: "k"}, "Identifier"), h("div", null, h("div", {class: "row nowrap"}, kind, ref.idInput), ref.idStatus),
+    h("span", {class: "k"}, "Title"), input("title", "title"),
+    h("span", {class: "k"}, "Year"), input("year", "year", {inputmode: "numeric", maxlength: "4", class: "year"}),
+    h("span", {class: "k"}, "First author"), input("first_author", "first author"),
+    h("span", {class: "k"}, "Field"), input("field", "field", {placeholder: "for example statistics, hydrology"}),
+    h("span"), h("div", {class: "hint"}, `Only works dated before the claim (${p.claim.date || "claim date unknown"}). ` +
+      "check-labels looks the identifier up, checks its date and title, and checks your quotes against the cached text: " +
+      "quote from the abstract or an open full text (arXiv, PubMed Central)."));
+}
+
+function renderCandidate(p, st, view, index, total) {
+  const {cid, c} = view;
+  const ref = R.cands[cid] = {relInputs: {}, keymarks: {}, eltexts: {}, quoteCounts: {}, warn: null, card: null,
+                              idInput: null, idStatus: null, view};
+  const card = h("div", {class: "cand", tabindex: "-1", dataset: {cid},
+    onfocusin: () => focusCandidate(cid, false), onpointerdown: () => focusCandidate(cid, false)});
+  ref.card = card;
+
+  // pre-filled evidence grouped by element
+  let prefilled = null;
+  const evidence = view.evidence;
+  if (!view.added && (evidence.length || !isBare(p))) {
+    const groups = st.order.map(id => ({id, entries: evidence.map((ev, n) => [n, ev]).filter(([, ev]) => ev.element === id)}));
+    const stray = evidence.map((ev, n) => [n, ev]).filter(([, ev]) => !st.order.includes(ev.element));
+    const entry = (n, ev) => {
+      const box = h("div", {class: "ev" + (c.rejected.includes(n) ? " rejected" : "")});
+      const toggle = h("input", {type: "checkbox", "aria-label": `reject quote pair #${n + 1} of ${cid}`, checked: c.rejected.includes(n), onchange: e => {
+        c.rejected = e.target.checked ? [...new Set([...c.rejected, n])] : c.rejected.filter(x => x !== n);
+        box.classList.toggle("rejected", e.target.checked);
+        onChange();
+      }});
+      box.append(
+        h("div", {class: "ev-head"}, h("span", {class: "mono faint"}, `#${n + 1}`),
+          ev.text_level === "abstract" ? badge("abstract only", "mark", "Abstract-level evidence: confidence at most 2 while it is kept")
+                                       : badge(ev.text_level === "full_text" ? "full text" : String(ev.text_level || "level?")),
+          ev.general_form ? badge("general form", null, "Quotes the candidate's general form (needed for each restricted element)") : null,
+          draftBadge(),
+          h("label", null, toggle, "reject this quote pair")),
+        h("div", {class: "quotes"},
+          h("div", null, h("div", {class: "loc"}, "Candidate, ", ev.location_candidate || "location?"), h("blockquote", null, ev.quote_candidate || "")),
+          h("div", null, h("div", {class: "loc"}, "Claim source, ", ev.location_claim || "location?"), h("blockquote", null, ev.quote_claim || ""))));
+      return box;
+    };
+    const without = groups.filter(g => !g.entries.length).map(g => g.id);
+    prefilled = h("div", null,
+      h("div", {class: "sub"}, "Pre-filled evidence ", draftBadge("drafts")),
+      evidence.length ? null : h("p", {class: "faint"}, "No pre-filled quotes for this candidate."),
+      groups.filter(g => g.entries.length).map(g => h("div", {class: "ev-group"},
+        h("div", {class: "eltitle"}, h("span", {class: "mono"}, g.id), " ", h("span", {class: "muted"}, st.chart[g.id].text)),
+        g.entries.map(([n, ev]) => entry(n, ev)))),
+      stray.length ? h("div", {class: "ev-group"}, h("div", {class: "eltitle muted"}, "Not tied to a chart element (dropped or unknown)"),
+        stray.map(([n, ev]) => entry(n, ev))) : null,
+      without.length && evidence.length ? h("p", {class: "faint small"}, `No pre-filled quote for ${without.join(", ")}.`) : null);
+  }
+
+  // the annotator's own quote pairs
+  const uncached = [!view.added && !view.work.cache_key ? "this candidate" : null,
+                    !(p.claim.source_work || {}).cache_key ? "the claim source" : null].filter(Boolean);
+  ref.addEvBtn = h("button", {type: "button", "aria-label": `add a quote pair to ${cid}`, onclick: () => addEvidence(cid)}, "Add a quote pair");
+  const mine = h("div", null,
+    h("div", {class: "sub"}, view.added ? "Evidence" : "Your quote pairs"),
+    uncached.length ? h("p", {class: "hint"}, `No text of ${uncached.join(" or of ")} is cached, so check-labels cannot ` +
+      `verify quotes from ${uncached.length > 1 ? "either" : "it"}. Tell Damir, who may cache an open copy.`) : null,
+    c.ev.length ? null : h("p", {class: "faint small"}, view.added || isBare(p)
+      ? "None yet: add a quote pair for each element you mark covered, analogous or restricted."
+      : "None added. Add one where a pre-filled quote is missing or wrong."),
+    c.ev.map((ev, n) => evidenceEditor(p, st, view, ev, n)),
+    h("div", {class: "row"}, ref.addEvBtn,
+      h("span", {class: "hint"}, "Verbatim, at most 40 words per quote; check-labels finds each one in the cached text.")));
+
+  // relation
+  const relName = `rel-${p.id}-${cid}`;
+  const rels = RELATIONS.map((r, i) => {
+    const input = h("input", {type: "radio", name: relName, value: r, "aria-label": `${cid} relation ${r}`, checked: c.relation === r,
+                              onchange: () => setRelation(cid, r)});
+    ref.relInputs[r] = input;
+    return h("label", {class: "rel"}, input, h("kbd", null, String(i + 1)), h("span", null, h("span", {class: "name"}, r), h("span", {class: "def"}, ": " + REL_DEFS[r])));
+  });
+  const relationBlock = h("fieldset", null,
+    h("div", {class: "sub row between"}, h("span", null, "Relation of the claim to this candidate"),
+      h("button", {type: "button", class: "link", "aria-label": `clear the relation of ${cid}`, onclick: () => setRelation(cid, null)}, "clear")),
+    rels,
+    h("div", {class: "hint"}, "When unsure between two labels, take the lower one (it claims less prior art) and set confidence 1."));
+
+  // elements
+  const rows = st.order.map(id => {
+    const keymark = h("span");
+    const eltext = h("span", {class: "muted"});
+    const qcount = h("span", {class: "small"});
+    ref.keymarks[id] = keymark;
+    ref.eltexts[id] = eltext;
+    ref.quoteCounts[id] = qcount;
+    const box = list => h("td", {class: "c"}, h("input", {type: "checkbox", "aria-label": `${cid} ${id} ${list}`,
+      checked: c[list].includes(id), onchange: ev => {
+        c[list] = ev.target.checked ? [...new Set([...c[list], id])] : c[list].filter(x => x !== id);
+        onChange();
+      }}));
+    return h("tr", null, h("td", null, h("span", {class: "mono"}, id), " ", keymark, " ", eltext),
+      box("covered"), box("analogous"), box("restricted"), h("td", {class: "c"}, qcount));
+  });
+  const elementsBlock = h("div", null,
+    h("div", {class: "sub"}, "Elements"),
+    st.order.length ? h("table", null,
+      h("thead", null, h("tr", null, h("th", null, "Claim element"),
+        h("th", {class: "c", title: "Covered by the candidate with the same meaning"}, "covered"),
+        h("th", {class: "c", title: "Corresponds by role only (similar_mechanism)"}, "analogous"),
+        h("th", {class: "c", title: "The claim obtains it by restricting the candidate (specialization); needs a general-form quote"}, "restricted"),
+        h("th", {class: "c", title: "Kept quote pairs for this element, pre-filled and yours"}, "quotes"))),
+      h("tbody", null, rows)) : h("p", {class: "faint small"}, "The chart has no elements yet."));
+
+  // cross-field, attribution, confidence
+  const claimField = [p.claim.field, p.claim.domain].filter(Boolean).join(" / ") || "unknown";
+  const candField = view.added ? null : [view.work.field, view.work.domain].filter(Boolean).join(" / ") || "unknown";
+  const opts = h("div", {class: "opts"},
+    h("span", {class: "k"}, "Cross-field"),
+    h("div", null, radioRow(`xf-${p.id}-${cid}`, [[true, "yes, a different field"], [false, "no, same field"]], c.cross_field,
+      v => { c.cross_field = v; onChange(); }, `${cid} cross-field: `),
+      h("div", {class: "hint"}, view.added ? `OpenAlex puts the claim in ${claimField}. Only a suggestion: you decide.`
+        : `OpenAlex suggests: candidate ${candField}; claim ${claimField}. Only a suggestion: you decide.`)),
+    h("span", {class: "k"}, "Attribution"),
+    h("div", null, radioRow(`at-${p.id}-${cid}`, [["cited", "cited"], ["not_cited", "not cited"], ["unknown", "unknown"]], c.attribution,
+      v => { c.attribution = v; onChange(); }, `${cid} attribution: `),
+      view.added || isBare(p) ? h("div", {class: "hint"}, "Does the source work cite this candidate? Check its reference list.")
+        : h("div", {class: "hint"}, "Does the source work cite this candidate? ",
+          draftBadge("hint"), " pre-fill from OpenAlex references: ", h("span", {class: "mono"}, view.hint))),
+    h("span", {class: "k"}, "Confidence"),
+    h("div", null, radioRow(`cf-${p.id}-${cid}`, [[1, "1 unsure"], [2, "2"], [3, "3 certain"]], c.confidence,
+      v => { c.confidence = v; onChange(); }, `${cid} confidence: `),
+      h("div", {class: "hint"}, "Abstract-only evidence allows at most 2 while it is kept.")));
+
+  ref.warn = h("ul", {class: "warn-list"});
+  const note = h("textarea", {rows: 2, value: c.note, placeholder: "Your note on this candidate (optional)", "aria-label": `${cid} note`,
+    oninput: e => { c.note = e.target.value; onChange(); }});
+
+  const head = view.added
+    ? h("div", {class: "cand-head"},
+        h("div", {class: "row between"}, h("h3", null, h("span", {class: "mono"}, cid), " ", badge("found by you")),
+          h("span", {class: "row"}, h("span", {class: "small faint"}, `Candidate ${index + 1} of ${total}`),
+            h("button", {type: "button", "aria-label": `remove candidate ${cid}`, onclick: () => removeCandidate(cid)}, "Remove candidate"))),
+        workForm(p, view, ref))
+    : h("div", {class: "cand-head"},
+        h("div", {class: "row between"}, h("h3", null, h("span", {class: "mono"}, cid)), h("span", {class: "small faint"}, `Candidate ${index + 1} of ${total}`)),
+        workBlock(view.work),
+        view.note ? h("p", {class: "draftnote small"}, isBare(p) ? null : [draftBadge("draft note"), " "], view.note) : null);
+  // append() would print a missing block (an added candidate has no pre-filled quotes) as the text "null"
+  card.append(...[head, prefilled, mine, relationBlock, elementsBlock, opts, h("div", {class: "sub"}, "Note"), note,
+                  ref.warn].filter(k => k != null && k !== false));
+  return card;
+}
+
+function renderItem() {
+  const p = currentPacket();
+  if (!p) return;
+  const st = S.items[p.id];
+  const bare = isBare(p);
+  const n = S.batch.items.length;
+  const idx = S.batch.items.indexOf(p);
+  R = {fields: {}, chart: {}, cands: {}, evRefs: [], evFocus: {}};
+  const views = candidateViews(p, st);
+  if (!S.focusCid || !views.some(v => v.cid === S.focusCid)) S.focusCid = views.length ? views[0].cid : null;
+
+  R.doneBtn = h("button", {type: "button", class: "strong", onclick: () => { st.done = !st.done; onChange(); }});
+  R.statusText = h("span", {class: "small muted"});
+  R.verdict = h("span", {class: "verdict"});
+  R.minutes = h("input", {type: "number", min: "0", step: "0.1", class: "minutes", "aria-label": "Minutes on this item",
+    onfocus: () => { S.minutesEditing = true; }, onblur: () => { S.minutesEditing = false; refresh(); },
+    oninput: e => { const v = parseFloat(e.target.value); if (Number.isFinite(v) && v >= 0) { st.seconds = v * 60; onChange(); } }});
+  R.timer = h("span", {class: "small faint"});
+  R.warn = h("div");
+
+  const pf = p.prefill || {};
+  const prefillLine = bare
+    ? h("p", {class: "small muted"}, "Nothing is pre-filled for this item: write the claim text, skeleton, coined names and chart " +
+        "from the source work, add the quote pairs your labels rest on, and choose every label.")
+    : h("p", {class: "small faint"}, draftBadge(), pf.by ? [" Pre-filled by ", pf.by] : " Pre-filled",
+        pf.date ? ` on ${pf.date}` : "", pf.fields && pf.fields.length ? `: ${pf.fields.join(", ")}` : "",
+        ". Check every pre-filled field against the source; you choose every label.");
+  const relWarning = Array.isArray(S.batch.labels) && !arrEq(S.batch.labels, RELATIONS)
+    ? h("p", {class: "error"}, `This batch lists the labels ${S.batch.labels.join(", ")}, which differ from the six this tool knows. Tell Damir before labelling.`) : null;
+  const copyWarning = S.batch.annotator != null && S.batch.annotator !== S.annotator
+    ? h("p", {class: "error"}, `This copy of batch ${S.batch.batch} is for annotator ${S.batch.annotator}, and you are ${S.annotator}. Load your own copy.`) : null;
+  const noticeBlock = S.notices.length ? h("section", {class: "block"},
+    h("p", {class: "error"}, "Some labels were not loaded, because they were made on another copy of this batch: an item " +
+      "that is pre-filled in one copy is bare in the other, and labels from one must never fill the other. Those items " +
+      "keep what this copy held (empty if nothing). If this is the wrong file or the wrong copy, load the right one."),
+    h("ul", {class: "warn-list"}, S.notices.map(x => h("li", null, x))),
+    h("button", {type: "button", onclick: () => { S.notices = []; rerender(() => R.heading); }}, "Dismiss")) : null;
+
+  const claim = p.claim;
+  const coined = Array.isArray(claim.coined_names) ? claim.coined_names : [];
+  const coinedField = bare
+    ? h("span", null, h("input", {type: "text", value: st.coined, "aria-label": "Coined names of the source work",
+        placeholder: "Comma-separated; leave empty if the source coins none", oninput: e => { st.coined = e.target.value; onChange(); }}),
+        h("span", {class: "faint small"}, "Method names, acronyms, named models the source coins. They must not appear in the claim text."))
+    : h("span", null, coined.length ? coined.join(", ") : "none", " ", draftBadge(),
+        h("span", {class: "faint small"}, "  must not appear in the claim text"));
+  const claimBlock = h("section", {class: "block"},
+    h("h2", null, "Claim"),
+    h("div", {class: "kv"},
+      h("span", {class: "k"}, "Claim date"), h("span", null, claim.date || "unknown", h("span", {class: "faint small"}, "  earliest public version of the source")),
+      h("span", {class: "k"}, "Field (OpenAlex)"), h("span", null, [claim.field, claim.domain].filter(Boolean).join(" / ") || "unknown",
+        typeof claim.computational === "boolean" ? h("span", {class: "faint small"}, claim.computational ? "  computational claim" : "  non-computational claim") : null),
+      h("span", {class: "k"}, "Coined names"), coinedField,
+      h("span", {class: "k"}, "Source work"), workBlock(claim.source_work)),
+    textField(p, st, "text", "Claim text", "Field-native: the source field's own words, minus author names, titles, years, venues and the coined name. Systems see only this."),
+    textField(p, st, "skeleton", "Skeleton", "Neutral, mechanism-level words. Never shown to systems."));
+
+  const chartRows = st.order.map(id => {
+    const ce = st.chart[id];
+    const pe = (claim.chart || []).find(e => e.id === id) || null;
+    const input = h("input", {type: "text", "aria-label": `${id} text`, value: ce.text,
+      placeholder: pe ? null : "The element in the source's terms", oninput: ev => { ce.text = ev.target.value; onChange(); }});
+    const status = h("span");
+    const restore = pe ? h("button", {type: "button", class: "link", "aria-label": `restore the pre-filled text of ${id}`,
+      onclick: () => { ce.text = pe.text ?? ""; input.value = ce.text; onChange(); }}, "restore pre-fill") : null;
+    const key = h("input", {type: "checkbox", "aria-label": `${id} is a key element`, checked: ce.key === true, indeterminate: ce.key === null,
+      onchange: ev => { ce.key = ev.target.checked; onChange(); }});
+    const keyLabel = h("span", {class: "small"});
+    const remove = h("button", {type: "button", class: "link", "aria-label": `remove element ${id}`, onclick: () => removeElement(id)}, "remove");
+    R.chart[id] = {input, status, restore, key, keyLabel, prefilled: pe};
+    return h("tr", null, h("td", {class: "id mono"}, id), h("td", null, input, h("div", {class: "row small"}, status, restore)),
+      h("td", {class: "keycell"}, h("label", null, key, keyLabel)), h("td", {class: "c"}, remove));
+  });
+  const dropped = (claim.chart || []).filter(e => !st.order.includes(e.id));
+  const full = st.order.length >= 6;
+  const chartBlock = h("section", {class: "block"},
+    h("h2", null, "Claim chart"),
+    h("p", {class: "hint"}, bare
+      ? "Nothing pre-filled: add two to six elements, one per distinct step or condition of the claim. Tick key for every element the claim cannot lose and still be the same claim; untick for the others. " + KEY_GUIDE
+      : "Tick key for every element the claim cannot lose and still be the same claim; untick for the others. " + KEY_GUIDE + " A dash means not decided yet. Edit an element's text, remove one that is not part of the claim, or add one that is missing (new elements get new ids, from e7)."),
+    st.order.length ? h("table", {class: "chart"}, h("thead", null, h("tr", null, h("th", null, "id"), h("th", null, "Element"), h("th", null, "Key"),
+      h("th", {class: "c"}, h("span", {class: "sr"}, "Remove")))), h("tbody", null, chartRows))
+      : h("p", {class: "muted"}, "No elements yet."),
+    dropped.length ? h("p", {class: "small dropped"}, h("span", {class: "muted"}, "Removed from the pre-fill: "),
+      dropped.map((e, i) => [i ? ", " : "", h("span", {class: "mono"}, e.id), " ",
+        h("button", {type: "button", class: "link", disabled: full, "aria-label": `restore element ${e.id}`, onclick: () => restoreElement(e.id)}, "restore")]),
+      full ? h("span", {class: "faint"}, ". Six elements at most: remove one first.") : null) : null,
+    h("div", {class: "row", style: "margin-top:8px"}, R.addElementBtn = h("button", {type: "button", disabled: full, onclick: addElement}, "Add element"),
+      full ? h("span", {class: "small faint"}, "Six elements at most: remove one first.") : null));
+
+  const candsWrap = h("div", {class: "cands " + S.layout}, views.map((v, i) => renderCandidate(p, st, v, i, views.length)));
+  R.candsWrap = candsWrap;
+  const layoutBtn = h("button", {type: "button", onclick: () => {
+    S.layout = S.layout === "side" ? "stacked" : "side";
+    store.set(KEYS.layout, S.layout);
+    candsWrap.className = "cands " + S.layout;
+    layoutBtn.textContent = S.layout === "side" ? "Stack candidates" : "Candidates side by side";
+  }}, S.layout === "side" ? "Stack candidates" : "Candidates side by side");
+  const candBlock = h("section", {class: "block"},
+    h("div", {class: "row between"}, h("h2", {style: "margin:0"}, `Candidates (${views.length})`), views.length > 1 ? layoutBtn : null),
+    h("p", {class: "hint"}, "Keys 1 to 6 choose a relation for the highlighted candidate; j and k move between candidates."),
+    views.length ? candsWrap : h("p", {class: "muted"}, "This item has no candidates yet. Search for earlier work and add what you find; with none, the verdict is nothing_close and the notes give the coverage."),
+    h("div", {class: "row", style: "margin-top:12px"}, R.addCandBtn = h("button", {type: "button", onclick: addCandidate}, "Add a candidate you found"),
+      h("span", {class: "hint"}, "An earlier work from your own search: identifier, title, year, first author and field, then label it like the others.")));
+
+  const notes = h("textarea", {rows: 3, value: st.notes, placeholder: "Your notes on this item", "aria-label": "Your notes on this item",
+    oninput: e => { st.notes = e.target.value; onChange(); }});
+  const notesBlock = h("section", {class: "block"}, h("h2", null, "Your notes"),
+    h("div", {class: "hint"}, "For nothing_close, write the coverage: fields, sources, date range, and what could not be read."), notes);
+
+  R.heading = h("h1", {style: "display:inline", tabindex: "-1"}, h("span", {class: "mono", style: "font-size:17px"}, p.id));
+  $("#main").replaceChildren(h("div", {class: "main-inner"},
+    h("div", {class: "item-head"},
+      h("div", null, R.heading,
+        h("span", {class: "muted"}, `   item ${idx + 1} of ${n}`), bare ? [" ", badge("no pre-fill")] : null),
+      h("div", {class: "row"},
+        h("button", {type: "button", disabled: idx === 0, onclick: () => go(-1)}, "Previous"),
+        R.doneBtn,
+        h("button", {type: "button", disabled: idx === n - 1, onclick: () => go(1)}, "Next"))),
+    h("div", {class: "item-meta"},
+      h("span", null, h("span", {class: "muted"}, "Verdict "), R.verdict),
+      R.statusText,
+      h("label", {class: "row", style: "gap:6px"}, h("span", {class: "muted"}, "Minutes"), R.minutes, R.timer)),
+    prefillLine, relWarning, copyWarning, noticeBlock,
+    h("section", {class: "block"}, R.warn),
+    p.notes ? h("section", {class: "block"}, h("h2", null, bare ? "Instructions" : ["Notes from the pre-fill ", draftBadge()]), h("p", {class: bare ? "" : "draftnote"}, p.notes)) : null,
+    claimBlock, chartBlock, candBlock, notesBlock,
+    h("div", {class: "foot"},
+      h("button", {type: "button", disabled: idx === 0, onclick: () => go(-1)}, "Previous item"),
+      h("button", {type: "button", disabled: idx === n - 1, onclick: () => go(1)}, "Next item"))));
+  focusCandidate(S.focusCid, false);
+  refresh();
+}
+
+function refresh() {
+  const p = currentPacket();
+  if (!p || !R) return;
+  const st = S.items[p.id];
+  const bare = isBare(p);
+  const item = exportItem(p, st);
+  const problems = labelItemProblems(p, st.done ? item : Object.assign({}, item, {status: "done"}));
+  const extra = loaderProblems(p, item);
+  const views = candidateViews(p, st);
+
+  // header of the item
+  R.doneBtn.textContent = st.done ? "Reopen" : "Mark done";
+  R.statusText.textContent = st.done ? "done" : "not done (exported as skipped)";
+  const strongest = views.find(v => v.c.relation === item.verdict);
+  fill(R.verdict, h("b", null, item.verdict),
+    item.verdict === "nothing_close"
+      ? h("span", {class: "small faint"}, allLabels(st).some(c => c.relation) ? "  no candidate at similar_mechanism or above" : "  no relation chosen yet")
+      : h("span", {class: "small faint"}, `  set by ${strongest ? strongest.cid : "?"}`),
+    ALREADY_DONE.includes(item.verdict)
+      ? h("span", {class: "small"}, "  ", badge("already-done verdict", "mark"), " check every key element; a false already-done is the costliest error") : null);
+  if (!S.minutesEditing) R.minutes.value = (st.seconds / 60).toFixed(1);
+  R.timer.textContent = S.timerState;
+
+  // warnings
+  const own = problems;
+  const ownTitle = st.done ? "Problems: check-labels will reject this item until they are fixed" : "Before you mark this item done";
+  fill(R.warn,
+    h("h2", null, ownTitle),
+    own.length ? h("ul", {class: "warn-list"}, own.map(x => h("li", null, x))) : h("p", {class: "okline"}, st.done ? "No problems." : "Nothing left: the labels are complete."),
+    extra.length ? [h("h2", {style: "margin-top:12px"}, "Also flagged by check-labels after merging"),
+      h("ul", {class: "warn-list soft"}, extra.map(x => h("li", null, x))),
+      extra.some(x => x.startsWith("rule 2")) ? h("p", {class: "hint"}, "A covered, analogous or restricted element needs a kept quote pair. If the pre-fill has none, add one with Add a quote pair.") : null] : null,
+    (st.added.length || allLabels(st).some(c => c.ev.length)) ? h("p", {class: "hint"}, "check-labels also looks up every candidate you added (its date and title) and checks every quote you added against the cached text.") : null);
+
+  // claim fields
+  for (const field of ["text", "skeleton"]) {
+    const f = R.fields[field];
+    const edited = st[field] !== (p.claim[field] ?? "");
+    if (bare) f.status.replaceChildren(st[field].trim() ? badge("yours", "edited") : badge("to write"));
+    else f.status.replaceChildren(edited ? badge("edited", "edited") : draftBadge());
+    if (f.restore) f.restore.disabled = !edited;
+    if (f.count) {
+      const nw = nWords(st.text);
+      f.count.textContent = `${nw} of ${MAX_CLAIM_WORDS} words`;
+      f.count.className = "small " + (nw > MAX_CLAIM_WORDS ? "error" : "faint");
+    }
+  }
+  for (const id of st.order) {
+    const ce = st.chart[id], r = R.chart[id];
+    if (!r) continue;
+    if (!r.prefilled) r.status.replaceChildren(badge(bare ? "yours" : "added", "edited"));
+    else {
+      const edited = ce.text !== (r.prefilled.text ?? "");
+      r.status.replaceChildren(edited ? badge("edited", "edited") : draftBadge());
+      r.restore.style.display = edited ? "" : "none";
+    }
+    r.key.indeterminate = ce.key === null;
+    r.key.checked = ce.key === true;
+    r.keyLabel.textContent = ce.key === null ? " not decided" : ce.key ? " key" : " not key";
+    r.keyLabel.className = "small " + (ce.key === null ? "faint" : "");
+  }
+
+  // candidates
+  for (const view of views) {
+    const c = view.c, ref = R.cands[view.cid];
+    if (!ref) continue;
+    for (const r of RELATIONS) ref.relInputs[r].checked = c.relation === r;
+    const kept = view.evidence.filter((ev, n) => !(c.rejected || []).includes(n)).concat(c.ev);
+    for (const id of st.order) {
+      const key = st.chart[id].key;
+      ref.keymarks[id].replaceChildren(key === true ? badge("key") : key === false ? h("span", {class: "faint small"}, "not key") : h("span", {class: "faint small"}, "key?"));
+      ref.eltexts[id].textContent = st.chart[id].text;
+      const nq = kept.filter(ev => ev.element === id).length;
+      ref.quoteCounts[id].textContent = nq ? String(nq) : "none";
+      ref.quoteCounts[id].className = "small " + (nq ? "" : "faint");
+    }
+    if (view.added) {
+      const w = c.work, id = normId(w.kind, w.id);
+      if (!w.id.trim()) fill(ref.idStatus);
+      else if (id) fill(ref.idStatus, h("span", {class: "faint"}, "Check it: "), workLinks({[w.kind]: id}).map(([label, url]) => extLink(label, url)));
+      else fill(ref.idStatus, h("span", {class: "error"}, `This does not look like ${ID_NAMES[w.kind]}.`));
+    }
+    const mine = x => new RegExp(`(^|: )candidate ${view.cid}[ :]`).test(x);
+    const list = [...own.filter(mine), ...extra.filter(mine)];
+    ref.warn.replaceChildren(...list.map(x => h("li", null, x)));
+    ref.warn.style.marginTop = list.length ? "10px" : "0";
+  }
+  for (const {ev, select, qcCount, qsCount} of R.evRefs) {
+    for (const opt of Array.from(select.children)) {
+      if (st.chart[opt.value]) opt.textContent = `${opt.value}  ${clip(st.chart[opt.value].text, 48)}`;
+    }
+    for (const [el, quote] of [[qcCount, ev.quote_candidate], [qsCount, ev.quote_claim]]) {
+      const nw = nWords(quote || "");
+      el.textContent = nw ? `${nw} of ${MAX_QUOTE_WORDS} words` : "";
+      el.className = "small " + (nw > MAX_QUOTE_WORDS ? "error" : "faint");
+    }
+  }
+  updateSidebar();
+}
+
+function setRelation(cid, relation) {
+  const p = currentPacket();
+  if (!p) return;
+  const c = labelsFor(S.items[p.id], cid);
+  if (!c) return;
+  c.relation = relation;
+  onChange();
+}
+
+function focusCandidate(cid, scroll) {
+  if (!R || !cid || !R.cands[cid]) return;
+  S.focusCid = cid;
+  for (const [id, ref] of Object.entries(R.cands)) ref.card.classList.toggle("focused", id === cid);
+  if (scroll) {
+    R.cands[cid].card.focus({preventScroll: true});
+    R.cands[cid].card.scrollIntoView({block: "start", behavior: "smooth"});
+  }
+}
+function moveCandidate(delta) {
+  const p = currentPacket();
+  if (!p) return;
+  const cids = candidateViews(p, S.items[p.id]).map(v => v.cid);
+  if (!cids.length) return;
+  const i = Math.max(0, Math.min(cids.length - 1, cids.indexOf(S.focusCid) + delta));
+  focusCandidate(cids[i], true);
+}
+
+// ---- editing the chart, the evidence and the candidates ----
+function currentState() { const p = currentPacket(); return p ? [p, S.items[p.id]] : [null, null]; }
+/** Render the item again after a change of its structure, keeping the scroll position; then focus what `target`
+ * returns. */
+function rerender(target) {
+  const main = $("#main");
+  const top = main.scrollTop;
+  persistSoon();
+  renderItem();
+  main.scrollTop = top;
+  const el = target && target();
+  if (el) el.focus({preventScroll: false});
+}
+/** Add an element with the next free id (st.next, which only grows, so a removed id is never given again). */
+function addElement() {
+  const [p, st] = currentState();
+  if (!p || st.order.length >= 6) return;
+  const id = "e" + st.next;
+  st.next += 1;
+  st.order.push(id);
+  st.chart[id] = {text: "", key: null};
+  rerender(() => R.chart[id] && R.chart[id].input);
+}
+/** Remove an element from the chart: its marks go from every candidate, its pre-filled quote pairs are rejected and
+ * the annotator's quote pairs for it lose their element (choose another or remove them). */
+function removeElement(id) {
+  const [p, st] = currentState();
+  if (!p || !st.chart[id]) return;
+  const marked = candidateViews(p, st).filter(v => ["covered", "analogous", "restricted"].some(l => v.c[l].includes(id))).map(v => v.cid);
+  const pairs = allLabels(st).reduce((n, c) => n + c.ev.filter(ev => ev.element === id).length, 0);
+  if ((marked.length || pairs) && !window.confirm(`Remove ${id}? ` + (marked.length ? `It is marked on ${marked.join(", ")}; those marks go. ` : "") +
+      (pairs ? `${pairs} of your quote pairs lose their element.` : ""))) return;
+  const after = st.order[st.order.indexOf(id) + 1];
+  st.order = st.order.filter(x => x !== id);
+  delete st.chart[id];
+  for (const c of allLabels(st)) {
+    for (const list of ["covered", "analogous", "restricted"]) c[list] = c[list].filter(x => x !== id);
+    for (const ev of c.ev) if (ev.element === id) ev.element = "";
+  }
+  for (const pc of p.candidates || []) {
+    const c = st.cands[pc.cid];
+    (pc.evidence || []).forEach((ev, n) => { if (ev.element === id && !c.rejected.includes(n)) c.rejected.push(n); });
+  }
+  rerender(() => (after && R.chart[after] ? R.chart[after].input : R.addElementBtn));
+}
+/** Bring back a pre-filled element that was removed, with its pre-filled text, in its packet position. Its
+ * pre-filled quote pairs stay rejected until the annotator unticks them. */
+function restoreElement(id) {
+  const [p, st] = currentState();
+  const pe = p && (p.claim.chart || []).find(e => e.id === id);
+  if (!pe || st.order.includes(id) || st.order.length >= 6) return;
+  const pids = p.claim.chart.map(e => e.id);
+  const at = st.order.findIndex(x => !pids.includes(x) || pids.indexOf(x) > pids.indexOf(id));
+  st.order.splice(at < 0 ? st.order.length : at, 0, id);
+  st.chart[id] = {text: pe.text ?? "", key: null};
+  rerender(() => R.chart[id] && R.chart[id].input);
+}
+function addEvidence(cid) {
+  const [p, st] = currentState();
+  const c = p && labelsFor(st, cid);
+  if (!c) return;
+  c.ev.push(freshEvidence());
+  const n = c.ev.length - 1;
+  S.focusCid = cid;
+  rerender(() => R.evFocus[`${cid}:${n}`]);
+}
+function removeEvidence(cid, n) {
+  const [p, st] = currentState();
+  const c = p && labelsFor(st, cid);
+  if (!c || !c.ev[n]) return;
+  const ev = c.ev[n];
+  if ((ev.quote_candidate.trim() || ev.quote_claim.trim()) && !window.confirm(`Remove your quote pair #${n + 1} of ${cid}?`)) return;
+  c.ev.splice(n, 1);
+  rerender(() => R.evFocus[`${cid}:${n}`] || (R.cands[cid] && R.cands[cid].addEvBtn));
+}
+function addCandidate() {
+  const [p, st] = currentState();
+  if (!p) return;
+  const a = freshAdded("a" + (Math.max(0, ...st.added.map(x => Number(x.cid.slice(1)))) + 1));
+  st.added.push(a);
+  S.focusCid = a.cid;
+  rerender(() => R.cands[a.cid] && R.cands[a.cid].idInput);
+}
+function removeCandidate(cid) {
+  const [p, st] = currentState();
+  const a = p && st.added.find(x => x.cid === cid);
+  if (!a) return;
+  const w = a.work;
+  const entered = a.relation || a.ev.length || [w.id, w.title, w.first_author, w.field, w.year].some(v => String(v).trim()) || a.note.trim();
+  if (entered && !window.confirm(`Remove candidate ${cid} and everything you entered for it?`)) return;
+  st.added = st.added.filter(x => x !== a);
+  if (S.focusCid === cid) S.focusCid = null;
+  rerender(() => R.addCandBtn);
+}
+
+// ---- timer ----
+let lastTick = performance.now();
+let ticks = 0;
+setInterval(() => {
+  const now = performance.now();
+  const dt = Math.min((now - lastTick) / 1000, 5);
+  lastTick = now;
+  const p = currentPacket();
+  if (!p || S.view !== "item" || !S.annotator || !S.items[p.id]) return;
+  let state;
+  if (document.visibilityState !== "visible") state = "paused: page hidden";
+  else if (!document.hasFocus()) state = "paused: window not focused";
+  else if (Date.now() - S.lastInput > IDLE_MS) state = "paused: idle for 10 minutes";
+  else state = "timing";
+  S.timerState = state;
+  if (state === "timing") S.items[p.id].seconds += dt;
+  if (R) {
+    if (!S.minutesEditing) R.minutes.value = (S.items[p.id].seconds / 60).toFixed(1);
+    R.timer.textContent = state;
+  }
+  ticks += 1;
+  if (ticks % 15 === 0) { persistNow(); updateSidebar(); }
+}, 1000);
+for (const ev of ["keydown", "pointerdown", "pointermove", "wheel", "input"]) {
+  document.addEventListener(ev, () => { S.lastInput = Date.now(); }, {capture: true, passive: true});
+}
+window.addEventListener("scroll", () => { S.lastInput = Date.now(); }, {capture: true, passive: true});
+window.addEventListener("pagehide", persistNow);
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") persistNow(); });
+
+// ---- keyboard ----
+document.addEventListener("keydown", e => {
+  if (e.metaKey || e.ctrlKey || e.altKey || S.view !== "item" || !S.batch || !S.annotator) return;
+  const t = e.target;
+  // a select takes typed letters and digits too (type-ahead: "e2" picks element e2), so it counts as typing
+  const typing = t && (t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable ||
+    (t.tagName === "INPUT" && !["checkbox", "radio", "button"].includes(t.type)));
+  if (typing) return;
+  if (/^[1-6]$/.test(e.key) && S.focusCid) { setRelation(S.focusCid, RELATIONS[Number(e.key) - 1]); e.preventDefault(); }
+  else if (e.key === "j") { moveCandidate(1); e.preventDefault(); }
+  else if (e.key === "k") { moveCandidate(-1); e.preventDefault(); }
+  else if (e.key === "]") { go(1); e.preventDefault(); }
+  else if (e.key === "[") { go(-1); e.preventDefault(); }
+});
+
+// ---- drag and drop ----
+let dragDepth = 0;
+document.addEventListener("dragenter", e => { e.preventDefault(); dragDepth += 1; document.body.classList.add("dragging"); });
+document.addEventListener("dragleave", () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) document.body.classList.remove("dragging"); });
+document.addEventListener("dragover", e => e.preventDefault());
+document.addEventListener("drop", e => {
+  e.preventDefault();
+  dragDepth = 0;
+  document.body.classList.remove("dragging");
+  const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if (file) readFile(file);
+});
+
+// ---- header buttons ----
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  $("#btnTheme").textContent = theme === "dark" ? "Light" : "Dark";
+}
+$("#btnTheme").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(next);
+  store.set(KEYS.theme, next);
+});
+$("#btnLoad").addEventListener("click", () => {
+  if (S.view === "loader" && S.batch) { S.view = "item"; }
+  else { persistNow(); S.view = "loader"; }
+  S.loaderMessage = "";
+  render();
+});
+$("#btnExport").addEventListener("click", downloadExport);
+$("#btnImport").addEventListener("click", () => $("#importFile").click());
+$("#importFile").addEventListener("change", e => { readFile(e.target.files[0]); e.target.value = ""; });
+
+// ---- testing hooks ----
+window.coelacanthExport = () => exportLabels();
+window.coelacanthImport = obj => loadAny(typeof obj === "string" ? JSON.parse(obj) : obj, {interactive: false});
+window.coelacanthLoadBatch = (batch, annotator) => {
+  if (annotator !== undefined && !ANNOTATOR_INPUT_RE.test(annotator)) throw new Error("annotator must look like a1");
+  return loadBatch(typeof batch === "string" ? JSON.parse(batch) : batch, {annotator});
+};
+window.coelacanthCore = Core;
+
+// ---- start ----
+applyTheme(store.get(KEYS.theme) === "light" ? "light" : "dark");
+S.layout = store.get(KEYS.layout) === "side" ? "side" : "stacked";
+const savedAnnotator = store.get(KEYS.annotator);
+if (savedAnnotator && ANNOTATOR_INPUT_RE.test(savedAnnotator)) S.annotator = savedAnnotator;
+const batchParam = new URLSearchParams(window.location.search).get("batch");
+if (batchParam && /^https?:$/.test(window.location.protocol)) {
+  render();
+  fetch(batchParam, {cache: "no-store"})
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+    .then(text => loadText(text, batchParam))
+    .catch(err => showLoaderError(`Could not fetch ${batchParam}: ${err.message}`));
+} else {
+  const last = store.get(KEYS.last);
+  let resumed = false;
+  if (last) {
+    try {
+      const batch = JSON.parse(store.get(KEYS.batch(last)) || "null");
+      if (batch && !batchShapeProblems(batch).length) { loadBatch(batch); resumed = true; }
+    } catch (e) { resumed = false; }
+  }
+  if (!resumed) render();
+}
+})();
+</script>
+</body>
+</html>

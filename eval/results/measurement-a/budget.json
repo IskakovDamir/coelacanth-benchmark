@@ -1,0 +1,87 @@
+{
+ "format": "coelacanth-budget/v1",
+ "price_date": "2026-10-06",
+ "lines": {
+  "pilots": 40,
+  "refpipe": 150,
+  "theorizer": 200,
+  "owl": 60,
+  "llm_baselines": 30,
+  "reserve": 20
+ },
+ "spent_outside_harness": {
+  "pilots": {
+   "usd": 35.41906960000001,
+   "sources": [
+    "eval/results/closed-book-pilot/ledger.jsonl",
+    "eval/results/closed-book-second-probe/ledger.jsonl",
+    "eval/results/closed-book-declarations-pilot/ledger.jsonl",
+    "eval/results/measurement-a/cli-probes.jsonl",
+    "eval/results/closed-book-v0/ledger.jsonl",
+    "eval/results/closed-book-canary/ledger.jsonl"
+   ]
+  },
+  "reserve": {
+   "usd": 7.7486885,
+   "sources": [
+    "data/candidates/declarations-triage/ledger.jsonl",
+    "data/candidates/ai-origin/ledger.jsonl",
+    "eval/results/ai-origin-prior-art/ledger.jsonl",
+    "eval/results/ai-origin-prior-art/probes.jsonl",
+    "eval/results/api-smoke-test/ledger.jsonl"
+   ]
+  }
+ },
+ "lines_note": "Approved October caps per line (PLAN.md, Budget). Spend booked on a line outside the harness is in spent_outside_harness, and budget.check subtracts it together with the harness ledgers' spend. Pilots line: the closed-book pilot ($2.3430), the second probe ($5.3696), the closed-book declarations pilot ($5.0703) and measurement A's CLI probes ($0.0862), $12.8692 in all, so $27.13 left on 2026-10-07. Reserve line: the triage rounds ($4.2602), AI-origin generation ($1.2985), the AI-origin prior-art pilot ($1.3860 in its ledger plus $0.0934 of probes) and the API smoke test ($0.0006), $7.0387 in all, so $12.96 left. Each usd is the sum of cost_usd over its sources, except the AI-origin prior-art probes, booked at the CLI's own cli_cost_usd because their cost_usd misses the web tool's own calls (eval/results/ai-origin-prior-art/README.md). A new ledger outside the harness is added to its line's sources and usd. Damir edits a line when money moves; the move is also recorded in approvals. On 2026-10-11 the cross-field cells of cf-0007 and cf-0044 left open by the credit stop were completed in the closed-book v0 ledger (18 calls, $0.3440, plus 5 failed calls on an outdated CLI, $0.0000), and the pilots line was updated to the ledgers' sum. On 2026-10-11 the missing closed-book samples of the v0 run (frozen prompt to 5 and cross-field prompt to 3 samples for every item, declines retried once) were run from a scratch copy: 274 calls, $3.6979, appended to the closed-book v0 ledger; the pilots line was updated to the ledgers' sum.",
+ "systems": {
+  "single-agent": "llm_baselines",
+  "prior-art-skill": "llm_baselines",
+  "hunch": "llm_baselines",
+  "inc-style": "llm_baselines",
+  "opennovelty-style": "llm_baselines",
+  "ideacatalyst-style": "llm_baselines",
+  "single-agent-matched": "refpipe",
+  "refpipe-v0": "refpipe",
+  "theorizer": "theorizer",
+  "owl": "owl",
+  "kulikowski-fp": "free"
+ },
+ "plan": [
+  {
+   "tier": "T1",
+   "system": "single-agent",
+   "subset": "R",
+   "condition": "text",
+   "items": 10
+  },
+  {
+   "tier": "T1",
+   "system": "prior-art-skill",
+   "subset": "R",
+   "condition": "text",
+   "items": 10
+  },
+  {
+   "tier": "T2",
+   "system": "single-agent",
+   "subset": "N_built",
+   "condition": "text",
+   "items": 9
+  },
+  {
+   "tier": "T2",
+   "system": "prior-art-skill",
+   "subset": "N_built",
+   "condition": "text",
+   "items": 9
+  },
+  {
+   "tier": "T3",
+   "system": "single-agent",
+   "subset": "R",
+   "condition": "skeleton",
+   "items": 10
+  }
+ ],
+ "approvals": []
+}

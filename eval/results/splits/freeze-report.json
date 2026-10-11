@@ -1,0 +1,138 @@
+{
+ "format": "coelacanth-freeze-report/v1",
+ "provisional": false,
+ "missing": [],
+ "seed": 20261019,
+ "counts": {
+  "ALL": 49,
+  "R": 10,
+  "R_half": 5,
+  "R_recalled": 9,
+  "H": 0,
+  "H_any": 0,
+  "H_post": 0,
+  "H_half": 0,
+  "P40": 10,
+  "P20": 5,
+  "C": 8,
+  "A": 10,
+  "N": 15,
+  "N_built": 9,
+  "K": 92,
+  "K_items": 32
+ },
+ "items": {
+  "total": 60,
+  "by_status": {
+   "adjudicated": 49,
+   "excluded": 1,
+   "candidate": 10
+  }
+ },
+ "excluded": {
+  "cf-0004": "no_full_text"
+ },
+ "closed_book": {
+  "H_before_named_works": [
+   "cf-0013",
+   "cf-0036",
+   "cf-0046"
+  ],
+  "recalled": [
+   "cf-0007",
+   "cf-0012",
+   "cf-0015",
+   "cf-0017",
+   "cf-0022",
+   "cf-0061"
+  ],
+  "declines": [
+   "cf-0044"
+  ],
+  "uncertain": [],
+  "incomplete": {},
+  "short_cells_all_R": {
+   "cf-0044": [
+    "claude-opus-5-5:cross_field",
+    "claude-opus-5-5:frozen"
+   ]
+  },
+  "moved_out_of_H_by_named_works": [
+   "cf-0013",
+   "cf-0036",
+   "cf-0046"
+  ],
+  "named_final": {
+   "H_before": [
+    "cf-0013",
+    "cf-0036",
+    "cf-0046"
+   ],
+   "H_after": []
+  }
+ },
+ "claim_texts_unchecked": [
+  "cf-0037",
+  "cf-0039",
+  "cf-0040",
+  "cf-0043",
+  "cf-0045",
+  "cf-0047",
+  "cf-0063",
+  "cf-0065",
+  "cf-0066"
+ ],
+ "validation": {
+  "checked": 60,
+  "items_with_violations": 60,
+  "by_rule": {
+   "rule 0": {
+    "violations": 204,
+    "items": 60,
+    "examples": [
+     "cf-0001: rule 0: claim.chart has no key element",
+     "cf-0001: rule 0: candidate 0: confidence must be 1, 2 or 3",
+     "cf-0001: rule 0: candidate 1: confidence must be 1, 2 or 3"
+    ]
+   },
+   "rule 2": {
+    "violations": 3,
+    "items": 2,
+    "examples": [
+     "cf-0016: rule 2: candidate 0 (specialization): restricted_elements is empty",
+     "cf-0016: rule 2: candidate 1 (specialization): restricted_elements is empty",
+     "cf-0036: rule 2: candidate 2 (specialization): restricted_elements is empty"
+    ]
+   },
+   "rule 3": {
+    "violations": 64,
+    "items": 31,
+    "examples": [
+     "cf-0006: rule 3: candidate 0 (partial): needs at least two covered key elements and one uncovered, covers [] of []",
+     "cf-0006: rule 3: candidate 1 (partial): needs at least two covered key elements and one uncovered, covers [] of []",
+     "cf-0007: rule 3: candidate 0 (partial): needs at least two covered key elements and one uncovered, covers [] of []"
+    ]
+   },
+   "rule 5": {
+    "violations": 9,
+    "items": 9,
+    "examples": [
+     "cf-0037: rule 5: claim.written_by is required, and claim.checked_by from adjudication on",
+     "cf-0039: rule 5: claim.written_by is required, and claim.checked_by from adjudication on",
+     "cf-0040: rule 5: claim.written_by is required, and claim.checked_by from adjudication on"
+    ]
+   }
+  },
+  "note": "quote checks (rule 4) skipped; the quiz did not collect key flags, confidence or element coverage, see annotation.schema_gaps"
+ },
+ "readings": [
+  "ALL is every item with status adjudicated; the 10 AI-origin items (status candidate, no judged candidates) are in A and in views_sha256 but not in ALL; cf-0004 (its only candidate excluded at adjudication) is excluded",
+  "R is attribution.json's R list, recomputed from the built items as a check",
+  "H uses the high bound for undecided borderline matches; named-final.json moves items out of H and H_any",
+  "H_post: dated on or after the latest post-cutoff date among models_for_H",
+  "N is every adjudicated nothing_close item outside C and A (decision 14); N_built is the natural distractors among them",
+  "K is the 92 closed-pool query papers (package IDs); K_items are the benchmark items drawn from the pool",
+  "P40 is all of R while R has at most 45 items; nested halves take ceil(n/2) items with the stratified seeded draw",
+  "default seed 20261019"
+ ]
+}

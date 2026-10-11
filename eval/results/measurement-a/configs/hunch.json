@@ -1,0 +1,99 @@
+{
+ "adapter": "agent",
+ "allowed_subsets": [
+  "P40",
+  "P20"
+ ],
+ "answer_after_n_searches": "first sentence of contract.txt",
+ "aux_models": [
+  "claude-haiku-4-5-20251001"
+ ],
+ "cli": {
+  "stop_subtypes": {
+   "capped": "error_max_budget_usd",
+   "turn_limit": "error_max_turns"
+  },
+  "version": "2.1.286 (Claude Code)"
+ },
+ "conditions": [
+  "text",
+  "skeleton"
+ ],
+ "disclosure": "Damir Iskakov, the author, wrote Hunch and co-founded AgentMash, whose Lab publishes it; Hunch was written on 1 Oct 2026, after this benchmark's label schema, and its relation types map one to one onto the schema's labels (eval/protocol.md section 6).",
+ "effort": "high",
+ "fetch_cap": 3,
+ "label_map": {
+  "empty_list": "nothing_close",
+  "no_json": "unparsed",
+  "rule": "precedence_over_candidates"
+ },
+ "league": "claude-code-agents",
+ "line": "llm_baselines",
+ "max_turns": 20,
+ "model": "claude-sonnet-5-5",
+ "models_called": [
+  "claude-sonnet-5-5",
+  "claude-haiku-4-5-20251001"
+ ],
+ "native": {
+  "kind": "per_candidate_relation",
+  "labels": [
+   "equivalent",
+   "specialization",
+   "generalization",
+   "partial",
+   "similar_mechanism",
+   "different"
+  ]
+ },
+ "per_item_cap_usd": 0.4,
+ "pinned": {
+  "commit": "2ae56e145be0e2fa2eba744296edbe8bcd5342a3",
+  "files": {
+   "lab/agents/hunch-hypotheses.md": "711b3dec575121fe11ad6f984293cc56504173ada623816a795d2651890797b5",
+   "lab/skills/lab-protocol/SKILL.md": "70f71a9462dd79996dfa83d602cf5778cb6117b933c4a87b933c37bcce85504e"
+  },
+  "repo": "github.com/agentmash-dev/agentmash-crew"
+ },
+ "price_date": "2026-10-06",
+ "probability": null,
+ "prompts": {
+  "brief": {
+   "path": "eval/results/measurement-a/prompts/agents/brief-hunch.txt",
+   "sha256": "e3d5e001db3804eb766df6e1419221fc59e0a0dee32762b4edd21d8a4a922b1d"
+  },
+  "contract": {
+   "path": "eval/results/measurement-a/prompts/agents/contract.txt",
+   "sha256": "4f46013c13b159cbdc2c94e11e9eafac0861447a62bf2dc47a7dc72bc1d57363"
+  },
+  "system": {
+   "sha256": "ee4f687e70865df7e9b892aaeef1c87d10c1b89f716a4f671a397917cfc1d9e3",
+   "source": "coelacanth.priorart.hunch_system"
+  }
+ },
+ "retrieval": {
+  "backend": "claude_code_web",
+  "date_filter": "contract sentence; post hoc in resolve",
+  "exclusions": "post hoc in resolve"
+ },
+ "row_label": "Hunch, AgentMash Lab's hunch-hypotheses agent (the author's own tool)",
+ "schema": "coelacanth-system-config/v1",
+ "search_cap": 3,
+ "system": "hunch",
+ "temperature": "CLI default, not settable",
+ "timeout_s": 900,
+ "tools": [
+  "WebSearch",
+  "WebFetch"
+ ],
+ "top_k": 10,
+ "tuning": {
+  "complete": false,
+  "items": [
+   "guide-P2",
+   "guide-E1"
+  ],
+  "iterations": []
+ },
+ "variant": "hunch"
+}

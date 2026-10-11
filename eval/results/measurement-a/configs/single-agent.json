@@ -1,0 +1,96 @@
+{
+ "adapter": "agent",
+ "allowed_subsets": [
+  "H",
+  "H_half",
+  "R",
+  "R_half",
+  "N",
+  "N_built",
+  "ALL_minus_H"
+ ],
+ "answer_after_n_searches": "first sentence of contract.txt",
+ "aux_models": [
+  "claude-haiku-4-5-20251001"
+ ],
+ "cli": {
+  "stop_subtypes": {
+   "capped": "error_max_budget_usd",
+   "turn_limit": "error_max_turns"
+  },
+  "version": "2.1.286 (Claude Code)"
+ },
+ "conditions": [
+  "text",
+  "skeleton"
+ ],
+ "disclosure": null,
+ "effort": "high",
+ "fetch_cap": 3,
+ "label_map": {
+  "empty_list": "nothing_close",
+  "no_json": "unparsed",
+  "rule": "precedence_over_candidates"
+ },
+ "league": "claude-code-agents",
+ "line": "llm_baselines",
+ "max_turns": 20,
+ "model": "claude-sonnet-5-5",
+ "models_called": [
+  "claude-sonnet-5-5",
+  "claude-haiku-4-5-20251001"
+ ],
+ "native": {
+  "kind": "per_candidate_relation",
+  "labels": [
+   "equivalent",
+   "specialization",
+   "generalization",
+   "partial",
+   "similar_mechanism",
+   "different"
+  ]
+ },
+ "per_item_cap_usd": 0.4,
+ "price_date": "2026-10-06",
+ "probability": null,
+ "prompts": {
+  "brief": {
+   "path": "eval/results/measurement-a/prompts/agents/brief-single.txt",
+   "sha256": "490a2ec627086331d06d745f502f5a2ffbf8def4af01492f7bdd574ae7d4b789"
+  },
+  "contract": {
+   "path": "eval/results/measurement-a/prompts/agents/contract.txt",
+   "sha256": "4f46013c13b159cbdc2c94e11e9eafac0861447a62bf2dc47a7dc72bc1d57363"
+  },
+  "system": {
+   "sha256": "bef349ad0720b97ac43186da87c1842722968ca87da64d528d677562de6eb8de",
+   "source": "coelacanth.priorart.SINGLE_SYSTEM"
+  }
+ },
+ "retrieval": {
+  "backend": "claude_code_web",
+  "date_filter": "contract sentence; post hoc in resolve",
+  "exclusions": "post hoc in resolve"
+ },
+ "row_label": "Single Claude agent with web search",
+ "schema": "coelacanth-system-config/v1",
+ "search_cap": 3,
+ "system": "single-agent",
+ "temperature": "CLI default, not settable",
+ "timeout_s": 900,
+ "tools": [
+  "WebSearch",
+  "WebFetch"
+ ],
+ "top_k": 10,
+ "tuning": {
+  "complete": true,
+  "items": [
+   "guide-P2",
+   "guide-E1"
+  ],
+  "iterations": []
+ },
+ "variant": "single"
+}

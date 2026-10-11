@@ -1,0 +1,11 @@
+[project]
+name = "coelacanth"
+version = "0.0.1"
+description = "Benchmark and reference pipeline for cross-field rediscoveries in science"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]

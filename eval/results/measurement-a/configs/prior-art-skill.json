@@ -1,0 +1,101 @@
+{
+ "adapter": "agent",
+ "allowed_subsets": [
+  "H",
+  "H_half",
+  "R",
+  "R_half",
+  "N",
+  "N_built",
+  "ALL_minus_H"
+ ],
+ "answer_after_n_searches": "first sentence of contract.txt",
+ "aux_models": [
+  "claude-haiku-4-5-20251001"
+ ],
+ "cli": {
+  "stop_subtypes": {
+   "capped": "error_max_budget_usd",
+   "turn_limit": "error_max_turns"
+  },
+  "version": "2.1.286 (Claude Code)"
+ },
+ "conditions": [
+  "text",
+  "skeleton"
+ ],
+ "disclosure": null,
+ "effort": "high",
+ "fetch_cap": 3,
+ "label_map": {
+  "empty_list": "nothing_close",
+  "no_json": "unparsed",
+  "rule": "precedence_over_candidates"
+ },
+ "league": "claude-code-agents",
+ "line": "llm_baselines",
+ "max_turns": 20,
+ "model": "claude-sonnet-5-5",
+ "models_called": [
+  "claude-sonnet-5-5",
+  "claude-haiku-4-5-20251001"
+ ],
+ "native": {
+  "kind": "per_candidate_relation",
+  "labels": [
+   "equivalent",
+   "specialization",
+   "generalization",
+   "partial",
+   "similar_mechanism",
+   "different"
+  ]
+ },
+ "per_item_cap_usd": 0.4,
+ "pinned": {
+  "cache": "cache/fulltext/prior-art-skill-czerwinski-2026.txt",
+  "sha256": "54efb4615c98cb627ca8a0377839f431cdf2c46ef9e9df26c9fbfb50a097a53c",
+  "source": "github.com/rianczerwinski/prior-art-skill"
+ },
+ "price_date": "2026-10-06",
+ "probability": null,
+ "prompts": {
+  "brief": {
+   "path": "eval/results/measurement-a/prompts/agents/brief-prior-art-skill.txt",
+   "sha256": "a2cd213928db9415c874cecb4dce64aa0c22ec0ae3c5ef3861c4045832c8d094"
+  },
+  "contract": {
+   "path": "eval/results/measurement-a/prompts/agents/contract.txt",
+   "sha256": "4f46013c13b159cbdc2c94e11e9eafac0861447a62bf2dc47a7dc72bc1d57363"
+  },
+  "system": {
+   "sha256": "7c3c3e54d8a722041ad7cd6526fc0f488b45b34c7491fc30df0c0a5d11691759",
+   "source": "coelacanth.priorart.prior_art_system"
+  }
+ },
+ "retrieval": {
+  "backend": "claude_code_web",
+  "date_filter": "contract sentence; post hoc in resolve",
+  "exclusions": "post hoc in resolve"
+ },
+ "row_label": "Prior-art skill (rianczerwinski/prior-art-skill, MIT)",
+ "schema": "coelacanth-system-config/v1",
+ "search_cap": 3,
+ "system": "prior-art-skill",
+ "temperature": "CLI default, not settable",
+ "timeout_s": 900,
+ "tools": [
+  "WebSearch",
+  "WebFetch"
+ ],
+ "top_k": 10,
+ "tuning": {
+  "complete": true,
+  "items": [
+   "guide-P2",
+   "guide-E1"
+  ],
+  "iterations": []
+ },
+ "variant": "prior_art_skill"
+}

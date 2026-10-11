@@ -1,0 +1,3 @@
+FULL  fingerprint+TF-IDF (vocabulary fit on all 18 families): P@1=0.826 MRR=0.870  (92 queries)
+HELD-OUT  (leave-one-family-out; the vocabulary never sees the test family): P@1=0.859 MRR=0.907  (92 held-out queries)
+  delta vs full: P@1 +0.033, MRR +0.037

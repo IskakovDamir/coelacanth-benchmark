@@ -1,0 +1,4 @@
+queries with a twin: 92
+abstract P@1=0.565 MRR=0.680 | skeleton P@1=0.815 MRR=0.860
+skeleton - abstract  MRR +0.181 [+0.097,+0.264]
+skeleton - abstract  P@1 +0.250 [+0.141,+0.359]

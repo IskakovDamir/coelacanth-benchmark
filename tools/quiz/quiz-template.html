@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Квиз разметчика</title>
+<style>
+:root {
+  --bg: #fbfbfa; --panel: #ffffff; --fg: #1d1d1f; --muted: #5f6368; --line: #e3e3e0; --line-strong: #c9c9c4;
+  --accent: #1f5fbf; --accent-soft: #e8f0fc; --ok: #1e7b45; --warn: #a15c00; --quote: #f4f4f1;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111113; --panel: #19191c; --fg: #ececec; --muted: #a0a0a6; --line: #2c2c31; --line-strong: #44444b;
+    --accent: #7fb0ff; --accent-soft: #1d2a40; --ok: #5cc98a; --warn: #e0a64a; --quote: #202024;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.55 var(--font); }
+body { padding: 0 16px 48px; }
+main { max-width: 980px; margin: 0 auto; }
+a { color: var(--accent); }
+h1 { font-size: 22px; margin: 18px 0 8px; }
+h2 { font-size: 17px; margin: 22px 0 8px; }
+h3 { font-size: 15px; margin: 14px 0 6px; }
+p { margin: 6px 0; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.mono { font-family: var(--mono); font-size: 12.5px; }
+.top { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 8px 0; max-width: 980px; margin: 0 auto; }
+.top .who { font-weight: 600; }
+.top .grow { flex: 1; }
+.linkbtn { background: none; border: none; color: var(--accent); font: inherit; padding: 2px 0; cursor: pointer; text-decoration: underline; }
+.bar { height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; width: 100%; }
+.bar > div { height: 100%; background: var(--accent); }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; margin: 10px 0; }
+.label { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin-bottom: 2px; }
+.claimtext { font-size: 15.5px; }
+ol.chart { margin: 4px 0 0; padding-left: 22px; }
+ol.chart li { margin: 3px 0; }
+.eid { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-right: 6px; }
+.links a { margin-right: 10px; white-space: nowrap; }
+.work-title { font-weight: 600; }
+.pairs { margin-top: 6px; }
+.element { margin: 12px 0 4px; font-size: 13.5px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 6px 0; }
+.quote { background: var(--quote); border-left: 3px solid var(--line-strong); padding: 6px 9px; border-radius: 4px; font-size: 14px; }
+.quote.cand { border-left-color: var(--accent); }
+.quote .loc { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; }
+.colhead { font-size: 12px; color: var(--muted); }
+.note { font-size: 13px; color: var(--muted); }
+.question { font-weight: 600; margin: 18px 0 8px; font-size: 16px; }
+.opts { display: grid; gap: 8px; }
+.opt { display: flex; gap: 10px; align-items: flex-start; text-align: left; width: 100%; padding: 10px 12px; border-radius: 8px;
+  border: 1px solid var(--line-strong); background: var(--panel); color: var(--fg); font: inherit; cursor: pointer; }
+.opt:hover { border-color: var(--accent); }
+.opt[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+.opt .letter { font-family: var(--mono); font-weight: 700; min-width: 1.6em; height: 1.6em; display: inline-flex; align-items: center;
+  justify-content: center; border-radius: 4px; border: 1px solid var(--line-strong); }
+.opt[aria-pressed="true"] .letter { background: var(--accent); color: var(--panel); border-color: var(--accent); }
+.opt .rname { font-weight: 600; }
+.opt .rkey { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-left: 6px; }
+.opt .rdef { display: block; font-size: 13.5px; color: var(--muted); }
+.other { margin: 8px 0 0 0; padding: 10px 12px; border: 1px dashed var(--line-strong); border-radius: 8px; }
+.yn { display: flex; gap: 8px; }
+.yn .opt { width: auto; min-width: 110px; justify-content: center; }
+textarea, input[type=text] { width: 100%; font: inherit; color: var(--fg); background: var(--panel); border: 1px solid var(--line-strong);
+  border-radius: 6px; padding: 7px 9px; }
+textarea { min-height: 56px; resize: vertical; }
+.nav { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+.btn { font: inherit; padding: 9px 18px; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--fg); cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); font-weight: 600; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.hint { font-size: 12.5px; color: var(--muted); }
+kbd { font-family: var(--mono); font-size: 11.5px; border: 1px solid var(--line-strong); border-radius: 3px; padding: 0 4px; color: var(--muted); }
+details.cheat { margin: 10px 0; }
+details.cheat > summary { cursor: pointer; color: var(--accent); }
+table.rels { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.rels td { border-top: 1px solid var(--line); padding: 7px 6px; vertical-align: top; }
+table.rels td:first-child { white-space: nowrap; }
+.warnline { color: var(--warn); font-size: 13.5px; }
+.okline { color: var(--ok); font-size: 13.5px; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+table.res { border-collapse: collapse; font-size: 13px; min-width: 760px; width: 100%; }
+table.res td:nth-child(2), table.res td:nth-child(3) { white-space: nowrap; }
+table.res th, table.res td { border-bottom: 1px solid var(--line); padding: 5px 7px; text-align: left; vertical-align: top; }
+table.res th { background: var(--quote); font-weight: 600; }
+table.res tr.missing td { color: var(--muted); }
+.timer { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+@media (max-width: 640px) {
+  body { padding: 0 12px 40px; }
+  .pair { grid-template-columns: 1fr; }
+  table.rels td { display: block; white-space: normal !important; border-top: none; padding: 2px 4px; }
+  table.rels tr { display: block; border-top: 1px solid var(--line); padding: 6px 0; }
+  h1 { font-size: 20px; }
+}
+</style>
+</head>
+<body>
+<div class="top" id="top"></div>
+<main id="app"></main>
+<script type="application/json" id="quiz-data">
+{"format": "coelacanth-quiz/v1", "annotator": "demo", "hash": "demo", "prefill_by": "claude-opus-5-5", "options_by": "model: Claude (session model)",
+ "relations": ["equivalent", "specialization", "generalization", "partial", "similar_mechanism", "different"],
+ "items": [{"id": "cf-9999", "batch": "demo",
+  "claim": {"date": "2001-05-14", "field": "Pharmacology (demo)", "text": "After a single intravenous dose, the plasma concentration of the drug falls by the same fraction in every equal time interval, so the time needed for the concentration to halve does not depend on the dose.",
+   "skeleton": "A quantity that decreases at a rate proportional to its current value takes the same time to halve from any starting value.",
+   "chart": [{"id": "e1", "text": "the concentration falls at a rate proportional to the current concentration"}, {"id": "e2", "text": "the halving time is the same at every concentration"}]},
+  "source": {"title": "Demo source work (not a real paper)", "first_author": "D. Example", "n_authors": 1, "year": 2001, "venue": "Demo Journal", "doi": "10.5555/demo.1"},
+  "candidates": [{"cid": "c1", "options": ["equivalent", "partial", "similar_mechanism"], "note": "Demo candidate.",
+   "work": {"title": "Demo candidate: decay of a radioactive sample (not a real paper)", "first_author": "E. Sample", "n_authors": 1, "year": 1950, "venue": "Demo Physics Letters", "field": "Physics and Astronomy", "doi": "10.5555/demo.2"},
+   "evidence": [{"element": "e1", "quote_candidate": "the number of undecayed nuclei decreases at a rate proportional to the number present", "quote_claim": "the plasma concentration of the drug falls by the same fraction in every equal time interval", "location_candidate": "abstract", "location_claim": "abstract", "text_level": "abstract", "general_form": false}]}]}]}
+</script>
+<script>
+(() => {
+"use strict";
+
+const RELATIONS = {
+  equivalent: {name: "То же самое",
+    def: "Ранняя работа говорит то же, что утверждение, при тех же условиях, только другими словами или обозначениями.",
+    ex: "Формула площади под кривой глюкозы из статьи 1994 года и метод трапеций (E1)."},
+  specialization: {name: "Утверждение: частный случай ранней работы",
+    def: "Зафиксируйте параметр или добавьте условие в ранней работе, и с тем же смыслом получится утверждение.",
+    ex: "Гребневая регрессия (штраф с единичной матрицей) и регуляризация Тихонова с любой матрицей G (S1)."},
+  generalization: {name: "Утверждение: обобщение ранней работы",
+    def: "Наоборот: ранняя работа это частный случай утверждения, она получается из него ограничением.",
+    ex: "Модель Басса и логистический рост: при p = 0 модель Басса становится логистической (G1)."},
+  partial: {name: "Частичное совпадение",
+    def: "Хотя бы два ключевых элемента есть в ранней работе с тем же смыслом, но хотя бы одного ключевого нет.",
+    ex: "Имитация отжига и алгоритм Метрополиса: правило принятия шага и распределение Больцмана есть, понижения температуры нет (P1)."},
+  similar_mechanism: {name: "Похожий механизм",
+    def: "У каждого ключевого элемента есть соответствие (хотя бы по роли), но система или смысл переменных другие.",
+    ex: "Изотерма Ленгмюра и кинетика Михаэлиса-Ментен: та же кривая насыщения, но доля покрытия против скорости реакции (M1)."},
+  different: {name: "Разное",
+    def: "Общие слова, тема или отдельные элементы, но меньше двух ключевых совпадают и не у каждого есть соответствие.",
+    ex: "Машина Больцмана и транспортное уравнение Больцмана: общее только имя (D1)."}
+};
+const LETTERS = ["A", "B", "C"];
+const IDLE_MS = 3 * 60 * 1000;
+const FORMAT = "coelacanth-quiz-results/v1";
+const COLUMNS = ["annotator", "quiz_hash", "item", "candidate", "letter", "relation", "other_text", "cross_field", "comment", "seconds"];
+
+const DATA = JSON.parse(document.getElementById("quiz-data").textContent);
+const ORDER = DATA.relations;
+const ID = DATA.annotator;
+const QUESTIONS = [];
+DATA.items.forEach((item, ii) => item.candidates.forEach((cand, ci) => QUESTIONS.push({
+  key: item.id + "/" + cand.cid, item, cand, itemIndex: ii, candIndex: ci})));
+
+const params = new URLSearchParams(location.search);
+const PREVIEW = params.get("preview");
+const STORAGE_KEY = "coelacanth-quiz:" + ID + ":" + DATA.hash;
+
+let state = {answers: {}, pos: 0, screen: "start"};
+let lastInput = Date.now();
+let lastTick = Date.now();
+
+function load() {
+  if (PREVIEW) return;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s && typeof s === "object" && s.answers) state = {answers: s.answers, pos: Math.min(s.pos || 0, QUESTIONS.length - 1), screen: "start"};
+    }
+  } catch (e) { /* storage blocked: work without it */ }
+}
+function save() {
+  if (PREVIEW) return;
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify({answers: state.answers, pos: state.pos})); } catch (e) { /* ignore */ }
+}
+
+// DOM helper: h("div", {class: "x"}, "text", child, ...). Text is always set as text, never as HTML.
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (v === null || v === undefined || v === false) continue;
+    if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "class") el.className = v;
+    else el.setAttribute(k, v === true ? "" : String(v));
+  }
+  for (const kid of kids.flat()) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.appendChild(typeof kid === "string" || typeof kid === "number" ? document.createTextNode(String(kid)) : kid);
+  }
+  return el;
+}
+
+function put(parent, ...kids) { parent.append(...kids.flat().filter(k => k !== null && k !== undefined && k !== false)); }
+function answer(key) {
+  if (!state.answers[key]) state.answers[key] = {choice: null, relation: null, undecided: false, other_text: "", cross: null, comment: "", seconds: 0};
+  return state.answers[key];
+}
+function relationDone(a, q) {
+  if (!a || !a.choice) return false;
+  if (a.choice !== "other") return true;
+  if (a.relation && others(q).includes(a.relation)) return true;
+  return a.other_text.trim().length > 0;
+}
+function complete(a, q) { return relationDone(a, q) && (a.cross === "yes" || a.cross === "no"); }
+function others(q) { return ORDER.filter(r => !q.cand.options.includes(r)); }
+function chosenRelation(a, q) {
+  if (!a || !a.choice) return "";
+  if (a.choice !== "other") return q.cand.options[LETTERS.indexOf(a.choice)];
+  if (a.relation) return a.relation;
+  return a.undecided ? "cannot_decide" : "";
+}
+function doneCount() { return QUESTIONS.filter(q => complete(state.answers[q.key], q)).length; }
+
+function links(w) {
+  const out = [];
+  if (!w) return out;
+  if (w.doi) out.push(["DOI", /^https?:/i.test(w.doi) ? w.doi : "https://doi.org/" + w.doi]);
+  if (w.openalex) out.push(["OpenAlex", "https://openalex.org/" + String(w.openalex).replace(/^https?:\/\/openalex\.org\//i, "")]);
+  if (w.arxiv) out.push(["arXiv", "https://arxiv.org/abs/" + w.arxiv]);
+  if (w.pmid) out.push(["PubMed", "https://pubmed.ncbi.nlm.nih.gov/" + w.pmid + "/"]);
+  if (w.oa_url && !out.some(l => l[1] === w.oa_url)) out.push(["Открытый текст", w.oa_url]);
+  return out;
+}
+function workBlock(w, label) {
+  const author = w.first_author ? w.first_author + (w.n_authors > 1 ? " и др." : "") : "";
+  const meta = [author, w.year, w.venue].filter(Boolean).join(", ");
+  const ls = links(w);
+  return h("div", {class: "panel"},
+    h("div", {class: "label"}, label),
+    h("div", {class: "work-title"}, w.title || "(без названия)"),
+    h("div", {class: "small"}, meta, w.publication_date ? " · дата " + w.publication_date : ""),
+    w.field ? h("div", {class: "small muted"}, "Область по OpenAlex (только подсказка): " + w.field) : null,
+    h("div", {class: "links small"}, ls.length ? ls.map(([t, u]) => h("a", {href: u, target: "_blank", rel: "noopener noreferrer"}, t)) : h("span", {class: "muted"}, "ссылок нет")));
+}
+function levelText(e) { return e.text_level === "full" || e.text_level === "full_text" ? "полный текст" : e.text_level === "abstract" ? "аннотация" : (e.text_level || ""); }
+
+function relTable() {
+  return h("table", {class: "rels"}, ORDER.map(r => h("tr", {},
+    h("td", {}, h("b", {}, RELATIONS[r].name), h("div", {class: "mono muted"}, r)),
+    h("td", {}, RELATIONS[r].def, h("div", {class: "small muted"}, "Пример: " + RELATIONS[r].ex)))));
+}
+function crossText() {
+  return h("p", {}, "Ранняя работа из другой области, если у неё и у утверждения разные дисциплины: свои журналы, конференции, учебники и словарь (статистика и медицина, физика и информатика: обычно «Да»). Если это разделы одной дисциплины, смотрите на словарь: ключевые понятия названы разными словами, значит «Да»; теми же, значит «Нет». Подсказка OpenAlex об области часто ошибается, особенно для старых работ.");
+}
+function rulesBlock() {
+  return [
+    h("p", {}, h("b", {}, "Ключевой элемент"), ": без него это уже не то же утверждение (шаги метода, нужные условия, заявленное свойство, цель). Проверка, пример расчёта и обстановка наблюдения обычно не ключевые."),
+    h("p", {}, h("b", {}, "Старшинство"), " сверху вниз: то же самое, частный случай, обобщение, частичное, похожий механизм, разное. Идите сверху вниз и остановитесь на первом подходящем."),
+    h("p", {}, h("b", {}, "Сомневаетесь между двумя: берите ту, что утверждает меньше"), " (нижнюю), и назовите обе в комментарии. Ложное «уже сделано» обходится дороже всех других ошибок."),
+    h("p", {}, "Ранняя работа засчитывается, только если опубликована раньше даты утверждения. Если нет, напишите это в комментарии.")];
+}
+function cheat() {
+  return h("details", {class: "cheat"}, h("summary", {}, "Шпаргалка"),
+    h("div", {class: "panel"}, relTable(), ...rulesBlock(), h("h3", {}, "Другая область?"), crossText()));
+}
+
+function renderTop() {
+  const top = document.getElementById("top");
+  top.replaceChildren();
+  const done = doneCount();
+  top.append(
+    h("span", {class: "who"}, "Квиз · " + ID),
+    h("button", {class: "linkbtn", onclick: () => go("start")}, "Начало"),
+    h("button", {class: "linkbtn", onclick: () => go("results")}, "Результаты"),
+    h("span", {class: "grow"}),
+    h("span", {class: "small muted"}, "Отвечено " + done + " из " + QUESTIONS.length),
+    h("div", {class: "bar"}, h("div", {style: "width:" + (QUESTIONS.length ? (100 * done / QUESTIONS.length).toFixed(1) : 0) + "%"})));
+}
+
+function renderStart(app) {
+  const done = doneCount();
+  const minutes = Math.round(QUESTIONS.length * 1.5);
+  put(app,
+    h("h1", {}, "Привет, " + ID),
+    h("p", {}, "Здесь " + DATA.items.length + " пунктов и " + QUESTIONS.length + " вопросов, примерно " + minutes + " минут (около полутора минут на вопрос). Работа сохраняется в этом браузере; можно закрыть страницу и вернуться."),
+    h("div", {class: "panel"},
+      h("h2", {}, "Что делать"),
+      h("ol", {},
+        h("li", {}, "Прочитайте утверждение, его скелет и карту элементов."),
+        h("li", {}, "Посмотрите раннюю работу (кандидата) и пары цитат: слева цитата из ранней работы, справа из работы утверждения."),
+        h("li", {}, "Выберите, как ранняя работа соотносится с утверждением: A, B, C или «Другое»."),
+        h("li", {}, "Ответьте, из другой ли области ранняя работа: Да или Нет."),
+        h("li", {}, "В конце скачайте результаты (CSV или JSON) и отправьте файл Дамиру.")),
+      h("p", {class: "small muted"}, "Текст утверждения, карта, цитаты и три варианта ответа подготовлены заранее моделью (Claude) и могут ошибаться. Цитаты подобраны заранее моделью; проверяйте их по ссылкам. Решаете вы; варианты A, B, C всегда стоят в порядке старшинства, а не в порядке вероятности.")),
+    h("h2", {}, "Шесть отношений"),
+    h("div", {class: "panel"}, relTable()),
+    h("div", {class: "panel"}, ...rulesBlock()),
+    h("h2", {}, "Ранняя работа из другой области?"),
+    h("div", {class: "panel"}, crossText()),
+    h("p", {class: "hint"}, "Клавиши: ", h("kbd", {}, "1"), " ", h("kbd", {}, "2"), " ", h("kbd", {}, "3"), " для A B C, ", h("kbd", {}, "4"), " для «Другое», ",
+      h("kbd", {}, "Y"), "/", h("kbd", {}, "Д"), " да, ", h("kbd", {}, "N"), "/", h("kbd", {}, "Н"), " нет, ", h("kbd", {}, "Enter"), " дальше."),
+    h("div", {class: "nav"},
+      h("button", {class: "btn primary", id: "begin", onclick: () => { go("question"); }}, done ? "Продолжить (вопрос " + (state.pos + 1) + ")" : "Начать"),
+      done ? h("button", {class: "btn", onclick: restart}, "Начать заново") : null));
+}
+
+function restart() {
+  if (!window.confirm("Стереть все ответы в этом браузере и начать заново?")) return;
+  state = {answers: {}, pos: 0, screen: "start"};
+  if (!PREVIEW) { try { localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ } }
+  render();
+}
+
+function renderQuestion(app) {
+  const q = QUESTIONS[state.pos];
+  const a = answer(q.key);
+  const item = q.item, claim = item.claim;
+  put(app,
+    h("h1", {}, item.id + " · " + q.cand.cid),
+    h("div", {class: "small muted"}, "пункт " + (q.itemIndex + 1) + " из " + DATA.items.length + ", вопрос " + (state.pos + 1) + " из " + QUESTIONS.length +
+      " · кандидат " + (q.candIndex + 1) + " из " + item.candidates.length + " в этом пункте"),
+    cheat(),
+    h("div", {class: "panel"},
+      h("div", {class: "label"}, "Утверждение · дата " + (claim.date || "?") + (claim.field ? " · область " + claim.field : "")),
+      h("div", {class: "claimtext"}, claim.text),
+      h("div", {class: "label", style: "margin-top:10px"}, "Скелет (без слов области)"),
+      h("div", {}, claim.skeleton),
+      h("div", {class: "label", style: "margin-top:10px"}, "Элементы карты"),
+      h("ol", {class: "chart"}, (claim.chart || []).map(e => h("li", {}, h("span", {class: "eid"}, e.id), e.text)))),
+    workBlock(item.source || {}, "Работа, где сформулировано утверждение"),
+    workBlock(q.cand.work || {}, "Ранняя работа (кандидат " + q.cand.cid + ")"),
+    evidenceBlock(q),
+    h("div", {class: "question"}, "Как ранняя работа соотносится с утверждением?"),
+    h("div", {class: "opts"},
+      q.cand.options.map((r, i) => optButton(LETTERS[i], r, a.choice === LETTERS[i], () => choose(LETTERS[i]))),
+      h("button", {class: "opt", "aria-pressed": a.choice === "other" ? "true" : "false", onclick: () => choose("other")},
+        h("span", {class: "letter"}, "4"), h("span", {}, h("span", {class: "rname"}, "Другое"),
+          h("span", {class: "rdef"}, "Другие три отношения, «не могу решить» или свой ответ словами")))),
+    a.choice === "other" ? otherBlock(q, a) : null,
+    h("div", {class: "question"}, "Ранняя работа из другой области?"),
+    h("div", {class: "yn"},
+      h("button", {class: "opt", "aria-pressed": a.cross === "yes" ? "true" : "false", onclick: () => setCross("yes")}, h("span", {class: "rname"}, "Да")),
+      h("button", {class: "opt", "aria-pressed": a.cross === "no" ? "true" : "false", onclick: () => setCross("no")}, h("span", {class: "rname"}, "Нет"))),
+    h("div", {class: "question"}, "Комментарий ", h("span", {class: "small muted"}, "(необязательно)")),
+    h("textarea", {id: "comment", placeholder: "Например: колебался между двумя отношениями; цитата не подтверждает элемент e2", oninput: ev => { a.comment = ev.target.value; touch(); save(); }}),
+    h("div", {class: "nav"},
+      h("button", {class: "btn", onclick: back, disabled: state.pos === 0}, "Назад"),
+      h("button", {class: "btn primary", id: "next", onclick: next, disabled: !complete(a, q)}, state.pos === QUESTIONS.length - 1 ? "К результатам" : "Дальше"),
+      h("span", {class: "hint", id: "why"}, whyNot(a, q)),
+      h("span", {class: "grow"}),
+      h("span", {class: "timer", id: "timer"}, timerText(a))));
+  document.getElementById("comment").value = a.comment || "";
+}
+function whyNot(a, q) {
+  if (complete(a, q)) return "";
+  if (!a.choice) return "Выберите отношение и ответьте про область.";
+  if (!relationDone(a, q)) return a.undecided ? "Напишите, почему не можете решить." : "В «Другое» выберите отношение или напишите ответ словами.";
+  return "Ответьте, из другой ли области ранняя работа.";
+}
+function timerText(a) {
+  const s = Math.round(a.seconds || 0);
+  const idle = Date.now() - lastInput > IDLE_MS || document.visibilityState === "hidden";
+  return "время " + Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0") + (idle ? " (пауза)" : "");
+}
+function optButton(letter, rel, pressed, onclick, keyHint) {
+  return h("button", {class: "opt", "aria-pressed": pressed ? "true" : "false", onclick},
+    h("span", {class: "letter"}, keyHint || letter),
+    h("span", {}, h("span", {class: "rname"}, RELATIONS[rel].name), h("span", {class: "rkey"}, rel), h("span", {class: "rdef"}, RELATIONS[rel].def)));
+}
+function otherBlock(q, a) {
+  return h("div", {class: "other"},
+    h("div", {class: "small muted"}, "Выберите одно из оставшихся отношений, или «Не могу решить», или только напишите ответ словами."),
+    h("div", {class: "opts", style: "margin-top:6px"},
+      others(q).map(r => optButton("", r, a.relation === r, () => { a.relation = a.relation === r ? null : r; a.undecided = false; touch(); save(); render(); }, "•")),
+      h("button", {class: "opt", "aria-pressed": a.undecided ? "true" : "false", onclick: () => { a.undecided = !a.undecided; if (a.undecided) a.relation = null; touch(); save(); render(); }},
+        h("span", {class: "letter"}, "?"), h("span", {}, h("span", {class: "rname"}, "Не могу решить"), h("span", {class: "rdef"}, "Напишите ниже, почему: какие отношения подходят и чего не хватает")))),
+    h("div", {class: "small", style: "margin-top:8px"}, "Ответ словами", a.relation ? h("span", {class: "muted"}, " (необязательно)") : h("span", {class: "warnline"}, " (обязательно без выбранного отношения)")),
+    h("textarea", {id: "othertext", oninput: ev => { a.other_text = ev.target.value; touch(); save(); refreshNav(); }}));
+}
+function evidenceBlock(q) {
+  const ev = q.cand.evidence || [];
+  const box = h("div", {class: "panel"}, h("div", {class: "label"}, "Пары цитат"));
+  box.append(h("div", {class: "small muted"}, "Цитаты подобраны заранее моделью; проверяйте их по ссылкам. Слева ранняя работа, справа работа утверждения."));
+  if (q.cand.note) box.append(h("div", {class: "note"}, "Справка о текстах: " + q.cand.note));
+  if (!ev.length) {
+    box.append(h("p", {class: "warnline"}, "У этого кандидата нет заранее подобранных цитат. Откройте его по ссылкам выше и сравните с утверждением сами."));
+    return box;
+  }
+  const chart = q.item.claim.chart || [];
+  const order = chart.map(e => e.id);
+  const ids = [...new Set(ev.map(e => e.element))].sort((x, y) => (order.indexOf(x) + 1 || 99) - (order.indexOf(y) + 1 || 99));
+  for (const id of ids) {
+    const el = chart.find(e => e.id === id);
+    box.append(h("div", {class: "element"}, h("span", {class: "eid"}, id), el ? el.text : ""));
+    for (const e of ev.filter(x => x.element === id)) {
+      box.append(h("div", {class: "pair"},
+        h("div", {class: "quote cand"}, h("div", {class: "colhead"}, "Ранняя работа" + (e.general_form ? " · общая форма" : "")), e.quote_candidate,
+          h("span", {class: "loc"}, [e.location_candidate, e.location_candidate === e.text_level ? "" : levelText(e)].filter(Boolean).join(" · "))),
+        h("div", {class: "quote"}, h("div", {class: "colhead"}, "Работа утверждения"), e.quote_claim,
+          h("span", {class: "loc"}, e.location_claim || ""))));
+    }
+  }
+  const missing = chart.filter(e => !ids.includes(e.id));
+  if (missing.length) box.append(h("div", {class: "small muted", style: "margin-top:8px"}, "Без цитат: " + missing.map(e => e.id).join(", ")));
+  return box;
+}
+
+function refreshNav() {
+  const q = QUESTIONS[state.pos], a = answer(q.key);
+  const nextBtn = document.getElementById("next");
+  if (nextBtn) nextBtn.disabled = !complete(a, q);
+  const why = document.getElementById("why");
+  if (why) why.textContent = whyNot(a, q);
+  renderTop();
+}
+function choose(letter) {
+  const q = QUESTIONS[state.pos], a = answer(q.key);
+  a.choice = letter;
+  if (letter !== "other") { a.relation = null; a.undecided = false; }
+  touch(); save(); render();
+  if (letter === "other") { const t = document.getElementById("othertext"); if (t) t.focus({preventScroll: true}); }
+}
+function setCross(v) { const a = answer(QUESTIONS[state.pos].key); a.cross = v; touch(); save(); render(); }
+function next() {
+  const q = QUESTIONS[state.pos];
+  if (!complete(answer(q.key), q)) return;
+  if (state.pos < QUESTIONS.length - 1) { state.pos += 1; save(); render(); window.scrollTo(0, 0); }
+  else go("results");
+}
+function back() { if (state.pos > 0) { state.pos -= 1; save(); render(); window.scrollTo(0, 0); } }
+function go(screen) { state.screen = screen; touch(); render(); window.scrollTo(0, 0); }
+
+function rows() {
+  return QUESTIONS.map(q => {
+    const a = state.answers[q.key];
+    return {annotator: ID, quiz_hash: DATA.hash, item: q.item.id, candidate: q.cand.cid,
+      letter: a && a.choice ? a.choice : "", relation: chosenRelation(a, q),
+      other_text: a && a.choice === "other" ? (a.other_text || "") : "",
+      cross_field: a && a.cross ? a.cross : "", comment: a ? (a.comment || "") : "",
+      seconds: a ? Math.round(a.seconds || 0) : 0, done: complete(a, q)};
+  });
+}
+function csvCell(v) { const s = String(v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function toCSV(rs) { return [COLUMNS.join(","), ...rs.map(r => COLUMNS.map(c => csvCell(r[c])).join(","))].join("\r\n") + "\r\n"; }
+function toTSV(rs) { const clean = v => String(v).replace(/[\t\r\n]+/g, " "); return [COLUMNS.join("\t"), ...rs.map(r => COLUMNS.map(c => clean(r[c])).join("\t"))].join("\n") + "\n"; }
+function toJSON(rs) {
+  return JSON.stringify({format: FORMAT, annotator: ID, quiz_hash: DATA.hash, exported_at: new Date().toISOString(),
+    answered: rs.filter(r => r.done).length, questions: rs.length,
+    answers: rs.map(r => Object.fromEntries(COLUMNS.filter(c => c !== "annotator" && c !== "quiz_hash").map(c => [c, r[c]])))}, null, 1) + "\n";
+}
+function download(name, text, type) {
+  const blob = new Blob([text], {type});
+  const url = URL.createObjectURL(blob);
+  const a = h("a", {href: url, download: name});
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+function copyText(text, msgEl) {
+  const ok = () => { msgEl.textContent = "Таблица скопирована. Вставьте её в письмо или в таблицу."; msgEl.className = "okline"; };
+  const fallback = () => {
+    const t = h("textarea", {style: "position:fixed;top:0;left:0;opacity:0"}); t.value = text; document.body.appendChild(t); t.select();
+    let done = false; try { done = document.execCommand("copy"); } catch (e) { done = false; }
+    t.remove();
+    if (done) ok(); else { msgEl.textContent = "Не удалось скопировать: скачайте CSV или JSON."; msgEl.className = "warnline"; }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+}
+
+function renderResults(app) {
+  const rs = rows();
+  const done = rs.filter(r => r.done).length;
+  const msg = h("div", {class: "small"});
+  const first = rs.findIndex(r => !r.done);
+  put(app,
+    h("h1", {}, "Результаты · " + ID),
+    done === rs.length
+      ? h("p", {class: "okline"}, "Все " + rs.length + " вопросов отвечены. Скачайте файл и отправьте его Дамиру.")
+      : h("p", {class: "warnline"}, "Отвечено " + done + " из " + rs.length + ". Пока не всё готово; файл можно скачать для сохранения, но отправляйте его, когда ответите на всё."),
+    h("p", {class: "small muted"}, "Код квиза " + String(DATA.hash).slice(0, 12) + ". Он записан в файл, чтобы ответы сошлись с вашими вопросами."),
+    h("div", {class: "nav"},
+      h("button", {class: "btn primary", onclick: () => download("quiz-" + ID + "-results.csv", "﻿" + toCSV(rs), "text/csv;charset=utf-8")}, "Скачать CSV"),
+      h("button", {class: "btn", onclick: () => download("quiz-" + ID + "-results.json", toJSON(rs), "application/json")}, "Скачать JSON"),
+      h("button", {class: "btn", onclick: () => copyText(toTSV(rs), msg)}, "Скопировать таблицу"),
+      first >= 0 ? h("button", {class: "btn", onclick: () => { state.pos = first; go("question"); }}, "К первому неотвеченному") : null),
+    msg,
+    h("div", {class: "tablewrap", style: "margin-top:12px"}, h("table", {class: "res"},
+      h("tr", {}, ["Разметчик", "Пункт", "Кандидат", "Буква", "Отношение", "Свой ответ", "Другая область", "Комментарий", "Секунд"].map(t => h("th", {}, t))),
+      rs.map((r, i) => h("tr", {class: r.done ? "" : "missing"},
+        h("td", {}, r.annotator),
+        h("td", {}, h("button", {class: "linkbtn", onclick: () => { state.pos = i; go("question"); }}, r.item)),
+        h("td", {}, r.candidate), h("td", {}, r.letter === "other" ? "Другое" : r.letter),
+        h("td", {class: "mono"}, r.relation), h("td", {}, r.other_text),
+        h("td", {}, r.cross_field === "yes" ? "Да" : r.cross_field === "no" ? "Нет" : ""),
+        h("td", {}, r.comment), h("td", {}, String(r.seconds)))))),
+    h("div", {class: "nav"}, h("button", {class: "btn", onclick: restart}, "Начать заново")));
+}
+
+function render() {
+  renderTop();
+  const app = document.getElementById("app");
+  app.replaceChildren();
+  if (!QUESTIONS.length) { app.append(h("p", {}, "В этом квизе нет вопросов.")); return; }
+  if (state.screen === "question") renderQuestion(app);
+  else if (state.screen === "results") renderResults(app);
+  else renderStart(app);
+  const t = document.getElementById("othertext");
+  if (t) { const q = QUESTIONS[state.pos]; t.value = answer(q.key).other_text || ""; }
+}
+
+function touch() { lastInput = Date.now(); }
+function tick() {
+  const now = Date.now();
+  const dt = Math.min(now - lastTick, 5000);
+  lastTick = now;
+  if (PREVIEW || state.screen !== "question" || document.visibilityState === "hidden" || now - lastInput > IDLE_MS) { updateTimer(); return; }
+  const a = answer(QUESTIONS[state.pos].key);
+  a.seconds = (a.seconds || 0) + dt / 1000;
+  updateTimer();
+  if (Math.floor(a.seconds) % 5 === 0) save();
+}
+function updateTimer() {
+  const el = document.getElementById("timer");
+  if (el && state.screen === "question") el.textContent = timerText(answer(QUESTIONS[state.pos].key));
+}
+["pointerdown", "keydown", "scroll", "touchstart", "wheel"].forEach(t => window.addEventListener(t, touch, {passive: true}));
+let lastMove = 0;
+window.addEventListener("mousemove", () => { const n = Date.now(); if (n - lastMove > 1000) { lastMove = n; touch(); } }, {passive: true});
+document.addEventListener("visibilitychange", () => { lastTick = Date.now(); if (document.visibilityState === "hidden") save(); });
+setInterval(tick, 1000);
+
+window.addEventListener("keydown", ev => {
+  if (state.screen !== "question" || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+  const tag = (ev.target && ev.target.tagName) || "";
+  if (tag === "TEXTAREA" || tag === "INPUT") return;
+  const k = ev.key;
+  if (k === "1" || k === "2" || k === "3") { choose(LETTERS[Number(k) - 1]); ev.preventDefault(); }
+  else if (k === "4") { choose("other"); ev.preventDefault(); }
+  else if ("yYдД".includes(k) && k.length === 1) { setCross("yes"); ev.preventDefault(); }
+  else if ("nNнН".includes(k) && k.length === 1) { setCross("no"); ev.preventDefault(); }
+  else if (k === "Enter") { if (tag !== "BUTTON") { next(); ev.preventDefault(); } }
+});
+
+function previewState() {
+  const fake = (q, i) => {
+    const kinds = ["A", "B", "C", "other"];
+    const choice = kinds[i % 4];
+    return {choice, relation: choice === "other" ? (i % 8 === 3 ? others(q)[0] : null) : null, undecided: choice === "other" && i % 8 !== 3,
+      other_text: choice === "other" ? "Пример ответа словами для снимка экрана" : "", cross: i % 3 ? "yes" : "no",
+      comment: i % 5 === 0 ? "Пример комментария" : "", seconds: 40 + 13 * i};
+  };
+  if (PREVIEW === "results") { QUESTIONS.forEach((q, i) => { state.answers[q.key] = fake(q, i); }); state.screen = "results"; }
+  else if (PREVIEW === "question") { state.answers[QUESTIONS[0].key] = {choice: "B", relation: null, undecided: false, other_text: "", cross: "yes", comment: "", seconds: 47}; state.screen = "question"; }
+  else if (PREVIEW === "other") { state.answers[QUESTIONS[0].key] = {choice: "other", relation: null, undecided: true, other_text: "Подходят и partial, и similar_mechanism: элемент e3 есть только по роли.", cross: null, comment: "", seconds: 95}; state.screen = "question"; }
+  else state.screen = "start";
+}
+
+load();
+if (PREVIEW && QUESTIONS.length) previewState();
+render();
+})();
+</script>
+</body>
+</html>

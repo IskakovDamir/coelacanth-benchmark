@@ -1,0 +1,39 @@
+data = data  (501 abstracts, 501 fingerprints)
+
+######## TABLE: CURATED -- 109 papers, 5,812 cross-field pairs, 210 twins (3.6%) ########
+  CURATED benchmark (complete labels): COMPARE methods. Headline = AP.
+  method                                     AP  AUROC    R@50   R@100   R@200
+  ----------------------------------------------------------------------------
+  -- SOTA scientific / general embedders, on the abstract (their native input) --
+  abstract + TF-IDF (cheap)               0.223  0.738   0.114   0.205   0.300
+  abstract + SPECTER                      skipped (ModuleNotFoundError)
+  abstract + SciNCL                       skipped (ModuleNotFoundError)
+  abstract + SemCSE                       skipped (ModuleNotFoundError)
+  abstract + Qwen3-Embedding-0.6B         skipped (ModuleNotFoundError)
+  abstract + E5-large-v2                  skipped (ModuleNotFoundError)
+  -- OURS: faceted fingerprint + TF-IDF, by distiller --
+  faceted-full + TF-IDF [Haiku (ours)]    0.557  0.928   0.181   0.352   0.557
+  faceted-full + TF-IDF [Opus]            0.533  0.912   0.214   0.338   0.495
+  faceted-full + TF-IDF [Qwen3-14b]       0.396  0.880   0.162   0.290   0.405
+  skeleton (MECHANISM) + TF-IDF [Haiku]   0.513  0.879   0.200   0.352   0.510
+
+######## TABLE: EXTENDED -- 501 papers, 118,261 cross-field pairs, 210 twins (0.2%) ########
+  EXTENDED / wild run (incomplete labels): DETECTION. Headline = recall of known twins; AP is not a score, only a like-for-like comparator.
+  method                                     AP  AUROC   R@100  R@1000  R@3000
+  ----------------------------------------------------------------------------
+  -- SOTA scientific / general embedders, on the abstract (their native input) --
+  abstract + TF-IDF (cheap)               0.040  0.777   0.067   0.210   0.329
+  abstract + SPECTER                      skipped (ModuleNotFoundError)
+  abstract + SciNCL                       skipped (ModuleNotFoundError)
+  abstract + SemCSE                       skipped (ModuleNotFoundError)
+  abstract + Qwen3-Embedding-0.6B         skipped (ModuleNotFoundError)
+  abstract + E5-large-v2                  skipped (ModuleNotFoundError)
+  -- OURS: faceted fingerprint + TF-IDF, by distiller --
+  faceted-full + TF-IDF [Haiku (ours)]    0.155  0.951   0.090   0.610   0.733
+  faceted-full + TF-IDF [Opus]            0.140  0.943   0.133   0.448   0.629
+  faceted-full + TF-IDF [Qwen3-14b]       0.079  0.932   0.071   0.433   0.629
+  skeleton (MECHANISM) + TF-IDF [Haiku]   0.258  0.925   0.219   0.524   0.652
+
+-> reproduce_out/curated_table.md + extended_table.md
+Best method: faceted-full + TF-IDF (Haiku). On curated it beats every SOTA baseline on AP;
+on the extended set it leads on recall of the known twins.

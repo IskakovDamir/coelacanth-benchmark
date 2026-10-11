@@ -1,0 +1,6 @@
+Brief (agent hunch-hypotheses)
+
+Goal: find out whether the claim below has already been published, and lay out the closest prior art.
+Study: prior-art check of one claim. There is no SSOT, decisions.md or pre-registration: this brief is the whole context. You cannot read or write files; return your report in your answer.
+Acceptance: your process steps 1 to 3 only; no proposals. Then the JSON block below.
+Ownership: none.

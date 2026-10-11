@@ -1,0 +1,8 @@
+[restricted] kalman-epidemic-001: publisher fetch failed (HTTPError)
+[restricted] hawkes-crime-001: publisher fetch failed (HTTPError)
+[restricted] kalman-epidemic-001: rebuilt from OpenAlex record (fallback), but DIFFERS from the frozen bytes (page changed or scrape format differs); numbers may shift slightly. The frozen file is available for verification (see README).
+[restricted] hawkes-crime-001: rebuilt from OpenAlex record (fallback), but DIFFERS from the frozen bytes (page changed or scrape format differs); numbers may shift slightly. The frozen file is available for verification (see README).
+[restricted] gp-geo-noname-001: rebuilt from OpenAlex record (fallback), but DIFFERS from the frozen bytes (page changed or scrape format differs); numbers may shift slightly. The frozen file is available for verification (see README).
+[restricted] pca-psychometrics-001: rebuilt from OpenAlex record (fallback), but DIFFERS from the frozen bytes (page changed or scrape format differs); numbers may shift slightly. The frozen file is available for verification (see README).
+[restricted] smoke-01: rebuilt from OpenAlex record (fallback), but DIFFERS from the frozen bytes (page changed or scrape format differs); numbers may shift slightly. The frozen file is available for verification (see README).
+[restricted] done: 0 present, 0 rebuilt exact, 5 rebuilt with drift, 0 not rebuilt.
