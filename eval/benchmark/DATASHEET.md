@@ -38,7 +38,7 @@ Quote pairs are checked verbatim after normalisation (`src/coelacanth/quotes.py`
 
 ## Distribution
 
-The code, protocol, labelling guide and this datasheet are public at https://github.com/IskakovDamir/coelacanth-benchmark. The items with their gold, the closed-book answers, the run records and the quiz returns ship in one password-protected archive with a canary string on Zenodo (DOI to be added); unpacked into the repository root, it lets the tests that need the data run (they skip without it). Code is MIT; data is CC-BY-4.0 (`eval/benchmark/LICENSE`); OpenAlex metadata is CC0; Kulikowski's derived data and the Gradient Coupling catalogue are CC-BY-4.0 and attributed. No Semantic Scholar or Asta records or full texts are shipped.
+The code, protocol, labelling guide and this datasheet are public at https://github.com/IskakovDamir/coelacanth-benchmark. The items with their gold, the closed-book answers, the run records and the quiz returns ship in one password-protected archive with a canary string in a permanent data repository (location and DOI to be added); unpacked into the repository root, it lets the tests that need the data run (they skip without it). Code is MIT; data is CC-BY-4.0 (`eval/benchmark/LICENSE`); OpenAlex metadata is CC0; Kulikowski's derived data and the Gradient Coupling catalogue are CC-BY-4.0 and attributed. No Semantic Scholar or Asta records or full texts are shipped.
 
 ## Maintenance
 
