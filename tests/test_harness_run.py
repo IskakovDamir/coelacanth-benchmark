@@ -279,7 +279,10 @@ class TestRunFlow(RunTestCase):
         self.assertEqual((row["cost"]["llm_calls"], row["cost"]["openalex_nominal"]), (1, native["openalex"]))
         manifest = json.loads((r.run_dir / "run.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["splits_sha256"], hashlib.sha256(splits.read_bytes()).hexdigest())
-        self.assertRegex(manifest["git_commit"], r"^[0-9a-f]{40}$")
+        if (run.REPO_ROOT / ".git").exists():
+            self.assertRegex(manifest["git_commit"], r"^[0-9a-f]{40}$")
+        else:  # a source download such as GitHub's ZIP has no history to name
+            self.assertIsNone(manifest["git_commit"])
         self.assertTrue(manifest["started"] <= manifest["finished"])
 
     def test_resume_runs_only_pending_items_and_keeps_the_start(self):
