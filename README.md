@@ -8,7 +8,7 @@ A silent 24.8-second overview of the main finding. The same clip as an [MP4](doc
 
 ## Main finding
 
-Three Claude models with no tools recall 9 of the 10 documented cross-field rediscoveries in v0, so a retrieval score on them cannot be separated from memory. For six of them a model names a quiz-gold cross-field work; three count only through works the models named, which an annotator rated and the author adjudicated. The tenth would be a closed-book failure only if the declines of Opus 5.5 were ignored and four undecided loose matches of Haiku 4.5 read as misses.
+Three Claude models with no tools recall 9 of the 10 documented cross-field rediscoveries in v0, so a retrieval score on them cannot be separated from memory. For six of them a model names a quiz-gold cross-field work; three count only through works the models named, which an annotator rated and the author adjudicated. The tenth would be a closed-book failure only if the declines of Opus 5.5 were ignored and four undecided loose matches of Haiku 4.5 read as misses. An attribution reading the annotators made on 21 October, after the rules freeze, would add an eleventh rediscovery, cf-0031, whose earlier work Opus 5.5 and Sonnet 5.5 name under both prompts, so 10 of 11 would be recalled; the frozen 10 stay the primary set, and the agents below ran on them.
 
 Two Claude Code agents with web search, Sonnet 5.5 with and without a prior-art skill, find a cross-field gold work in their top 10 for 3 and 5 of the 10 items. Sonnet 5.5 without tools names one in at least one of five samples for 6 (4 on quiz gold alone). On the 9 near-negatives the single agent answers `nothing_close` for 1 and the prior-art skill for none.
 
