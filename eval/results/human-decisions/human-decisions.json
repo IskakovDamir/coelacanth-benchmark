@@ -24,9 +24,9 @@
   },
   {
    "task": "attribution, round of 2026-10-21 (after the freeze)",
-   "by": "annotators (one joint reading, author's account)",
+   "by": "paid annotators (one joint reading, author's account)",
    "n": 4,
-   "covers": "the 4 pairs read as cannot check; three annotators answered together, recorded once under a1",
+   "covers": "the 4 pairs read as cannot check; three paid annotators answered together, recorded once under a1",
    "source": "eval/benchmark/v0/checks/round-2026-10-21/returned/attribution-r2-a1.json"
   },
   {
@@ -75,7 +75,7 @@
  "by": {
   "annotators": 408,
   "author": 95,
-  "annotators (one joint reading, author's account)": 4,
+  "paid annotators (one joint reading, author's account)": 4,
   "annotators (author's account)": 213
  },
  "total": 720
