@@ -1,0 +1,36 @@
+__pycache__/
+*.pyc
+.DS_Store
+._*
+.env
+.venv/
+cache/
+
+# Fetched by eval/results/kulikowski-baseline/run.sh
+data/raw/
+
+# The decrypted data archive (eval/benchmark/DATASHEET.md) unpacks into this tree; its files stay out of git.
+coelacanth-v0-data.tar.gz*
+CANARY.txt
+MANIFEST.sha256
+data/candidates/
+eval/benchmark/v0/
+eval/results/ai-origin-prior-art/
+eval/results/api-smoke-test/
+eval/results/closed-book-canary/
+eval/results/closed-book-declarations-pilot/
+eval/results/closed-book-pilot/
+eval/results/closed-book-second-probe/
+eval/results/closed-book-v0/*.json
+eval/results/closed-book-v0/*.jsonl
+eval/results/closed-book-v0/*.html
+eval/results/closed-book-v0/*.log
+eval/results/measurement-a/*.json
+eval/results/measurement-a/*.jsonl
+!eval/results/measurement-a/budget.json
+!eval/results/measurement-a/config-hashes.jsonl
+eval/results/measurement-a/pilots/
+eval/results/measurement-a/runs/
+eval/results/measurement-a/scores/
+eval/results/measurement-a/scores-with-named/
+paper/ecir2027/
