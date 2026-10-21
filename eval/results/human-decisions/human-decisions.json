@@ -23,6 +23,13 @@
    "source": "eval/benchmark/v0/checks/returned/attribution-a*.json"
   },
   {
+   "task": "attribution, round of 2026-10-21 (after the freeze)",
+   "by": "annotators (one joint reading, author's account)",
+   "n": 4,
+   "covers": "the 4 pairs read as cannot check; three annotators answered together, recorded once under a1",
+   "source": "eval/benchmark/v0/checks/round-2026-10-21/returned/attribution-r2-a1.json"
+  },
+  {
    "task": "claim-text check",
    "by": "annotators",
    "n": 51,
@@ -68,7 +75,8 @@
  "by": {
   "annotators": 408,
   "author": 95,
+  "annotators (one joint reading, author's account)": 4,
   "annotators (author's account)": 213
  },
- "total": 716
+ "total": 720
 }

@@ -6,7 +6,9 @@ Every row is a count of recorded answers in a file of this repository, read from
 answers, not of people: five people took part on the author's statement, under three IDs (a1 and a2 each used by two people, a3 by one),
 with no record of which of two gave a given answer (paper Section 3.7). The borderline closed-book matches were decided
 by the paid annotators on the author's account, which the files do not record and which differs from his earlier
-logged accounts, so that row is kept apart from the annotators' rows and from the author's. Writes human-decisions.json beside this file and prints the table.
+logged accounts, so that row is kept apart from the annotators' rows and from the author's. The attribution round of 2026-10-21,
+after the rules freeze, is one joint reading: three annotators answered together and the author recorded the answer once
+under a1 (his statement), so it is kept apart too. Writes human-decisions.json beside this file and prints the table.
 """
 
 from __future__ import annotations
@@ -30,6 +32,7 @@ def main() -> int:
     attribution_files = [load(f"eval/benchmark/v0/checks/returned/attribution-{a}.json")["answers"] for a in ids]
     attribution = sum(len(f) for f in attribution_files)
     cannot_check = len({key for f in attribution_files for key, v in f.items() if v["answer"] == "cannot_check"})
+    round2 = len(load("eval/benchmark/v0/checks/round-2026-10-21/returned/attribution-r2-a1.json")["answers"])
     claimcheck = sum(len(load(f"eval/benchmark/v0/checks/returned/claimcheck-{a}.json")["answers"]) for a in ids)
     named_read = sum(len(load(f"eval/benchmark/v0/checks/returned/named-{a}.json")["answers"]) for a in ("a1", "a2"))
     adjudicated = len(load("eval/benchmark/v0/quiz/adjudication/decisions-damir.json")["entries"])
@@ -47,6 +50,9 @@ def main() -> int:
         {"task": "attribution of cross-field gold pairs", "by": "annotators", "n": attribution,
          "covers": f"24 pairs, two readings each; {cannot_check} pairs read as cannot check",
          "source": "eval/benchmark/v0/checks/returned/attribution-a*.json"},
+        {"task": "attribution, round of 2026-10-21 (after the freeze)", "by": "annotators (one joint reading, author's account)",
+         "n": round2, "covers": f"the {cannot_check} pairs read as cannot check; three annotators answered together, recorded once under a1",
+         "source": "eval/benchmark/v0/checks/round-2026-10-21/returned/attribution-r2-a1.json"},
         {"task": "claim-text check", "by": "annotators", "n": claimcheck, "covers": "51 probed items",
          "source": "eval/benchmark/v0/checks/returned/claimcheck-a*.json"},
         {"task": "pair label, batch b03 (printed sheets)", "by": "annotators", "n": b03, "covers": "3 pairs, two readings each",
