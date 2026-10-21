@@ -4,7 +4,7 @@ Coelacanth v0 is a benchmark for precedent checkers, the tools that check whethe
 
 [![Coelacanth overview](docs/media/overview.gif)](docs/media/overview.mp4)
 
-A silent 24.8-second overview of the main finding; click it for the [MP4](docs/media/overview.mp4). Worked example E1 in its first seconds is excluded from the benchmark.
+A silent 24.8-second overview of the main finding. The same clip as an [MP4](docs/media/overview.mp4) (519 KB) downloads from GitHub, which has no player for it. Worked example E1 in its first seconds is excluded from the benchmark.
 
 ## Main finding
 
@@ -12,7 +12,7 @@ Three Claude models with no tools recall 9 of the 10 documented cross-field redi
 
 Two Claude Code agents with web search, Sonnet 5.5 with and without a prior-art skill, find a cross-field gold work in their top 10 for 3 and 5 of the 10 items. Sonnet 5.5 without tools names one in at least one of five samples for 6 (4 on quiz gold alone). On the 9 near-negatives the single agent answers `nothing_close` for 1 and the prior-art skill for none.
 
-Five paid annotators labelled 136 claim-candidate pairs twice, choosing the relation from three options Claude proposed or any other, and the author settled the 51 disagreements. Of the 272 answers, 189 equal the option Claude ranked first. Krippendorff's alpha on the six-way relation is 0.542, below the 0.667 the protocol fixed before labelling.
+Five paid annotators labelled 136 claim-candidate pairs twice, choosing the relation from three options Claude proposed (the page also allowed any other relation, and no answer used it), and the author settled the 51 disagreements. Of the 272 answers, 189 equal the option Claude ranked first. Krippendorff's alpha on the six-way relation is 0.542, below the 0.667 the protocol fixed before labelling.
 
 ## Paper
 
@@ -36,7 +36,7 @@ Python 3.12 or later; the package uses only the standard library.
 PYTHONPATH=src python3 -m unittest discover -s tests
 ```
 
-On 21 October 2026 the 647 tests ran without a failure on Python 3.12 and 3.14; the ones that need the data archive, cached full texts or scikit-learn were skipped.
+On 21 October 2026 the 647 tests ran without a failure on Python 3.12 and 3.14, in a git clone and in a copy without git history such as GitHub's ZIP download; the ones that need the data archive, cached full texts, a clean-room prompt or scikit-learn were skipped.
 
 The reproduction of Kulikowski's TF-IDF baseline (paper, Section 6) needs git, curl, unzip, shasum, md5 and network access, and no model or API key:
 
