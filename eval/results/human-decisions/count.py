@@ -4,9 +4,9 @@
 
 Every row is a count of recorded answers in a file of this repository, read from the file, not typed in. A count is of
 answers, not of people: five people took part on the author's statement, under three IDs (a1 and a2 each used by two people, a3 by one),
-with no record of which of two gave a given answer (paper Section 3.8). Who decided the borderline
-closed-book matches is not recorded either (annotators and the author, in an unrecorded split), so those rows are kept
-apart from the annotators' rows and from the author's. Writes human-decisions.json beside this file and prints the table.
+with no record of which of two gave a given answer (paper Section 3.7). The borderline closed-book matches were decided
+by the paid annotators on the author's account, which the files do not record and which differs from his earlier
+logged accounts, so that row is kept apart from the annotators' rows and from the author's. Writes human-decisions.json beside this file and prints the table.
 """
 
 from __future__ import annotations
@@ -27,7 +27,9 @@ def main() -> int:
     ids = ("a1", "a2", "a3")
     quiz = sum(len(load(f"eval/benchmark/v0/quiz/answers/{a}.json")["answers"]) for a in ids)
     b03 = sum(len(load(f"eval/benchmark/v0/quiz/b03/answers/{a}.json")["answers"]) for a in ids)
-    attribution = sum(len(load(f"eval/benchmark/v0/checks/returned/attribution-{a}.json")["answers"]) for a in ids)
+    attribution_files = [load(f"eval/benchmark/v0/checks/returned/attribution-{a}.json")["answers"] for a in ids]
+    attribution = sum(len(f) for f in attribution_files)
+    cannot_check = len({key for f in attribution_files for key, v in f.items() if v["answer"] == "cannot_check"})
     claimcheck = sum(len(load(f"eval/benchmark/v0/checks/returned/claimcheck-{a}.json")["answers"]) for a in ids)
     named_read = sum(len(load(f"eval/benchmark/v0/checks/returned/named-{a}.json")["answers"]) for a in ("a1", "a2"))
     adjudicated = len(load("eval/benchmark/v0/quiz/adjudication/decisions-damir.json")["entries"])
@@ -43,7 +45,7 @@ def main() -> int:
         {"task": "disagreements settled", "by": "author", "n": adjudicated, "covers": "one-line reason each",
          "source": "eval/benchmark/v0/quiz/adjudication/decisions-damir.json"},
         {"task": "attribution of cross-field gold pairs", "by": "annotators", "n": attribution,
-         "covers": "24 pairs, two readings each",
+         "covers": f"24 pairs, two readings each; {cannot_check} pairs read as cannot check",
          "source": "eval/benchmark/v0/checks/returned/attribution-a*.json"},
         {"task": "claim-text check", "by": "annotators", "n": claimcheck, "covers": "51 probed items",
          "source": "eval/benchmark/v0/checks/returned/claimcheck-a*.json"},
@@ -54,7 +56,7 @@ def main() -> int:
          "source": "eval/benchmark/v0/checks/returned/named-a1.json, named-a2.json"},
         {"task": "named works rated gold", "by": "author", "n": named_adj, "covers": "14 of the 31 works",
          "source": "eval/benchmark/v0/checks/returned/named-decisions.json"},
-        {"task": "borderline closed-book matches", "by": "people, split not recorded", "n": borderline,
+        {"task": "borderline closed-book matches", "by": "annotators (author's account)", "n": borderline,
          "covers": "first run", "source": "eval/results/closed-book-v0/borderline-decisions.json"},
         {"task": "re-decision of random borderline matches", "by": "author", "n": recheck,
          "covers": "repeats entries of the row above",

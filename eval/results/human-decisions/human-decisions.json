@@ -19,7 +19,7 @@
    "task": "attribution of cross-field gold pairs",
    "by": "annotators",
    "n": 48,
-   "covers": "24 pairs, two readings each",
+   "covers": "24 pairs, two readings each; 4 pairs read as cannot check",
    "source": "eval/benchmark/v0/checks/returned/attribution-a*.json"
   },
   {
@@ -52,7 +52,7 @@
   },
   {
    "task": "borderline closed-book matches",
-   "by": "people, split not recorded",
+   "by": "annotators (author's account)",
    "n": 213,
    "covers": "first run",
    "source": "eval/results/closed-book-v0/borderline-decisions.json"
@@ -68,7 +68,7 @@
  "by": {
   "annotators": 408,
   "author": 95,
-  "people, split not recorded": 213
+  "annotators (author's account)": 213
  },
  "total": 716
 }
