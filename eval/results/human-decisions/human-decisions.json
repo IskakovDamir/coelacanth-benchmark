@@ -5,7 +5,7 @@
    "task": "pair label (relation and cross-field answer)",
    "by": "annotators",
    "n": 272,
-   "covers": "4 pairs of b01 and b02, two readings each",
+   "covers": "136 pairs of b01 and b02, two readings each",
    "source": "eval/benchmark/v0/quiz/answers/a1.json, a2.json, a3.json"
   },
   {

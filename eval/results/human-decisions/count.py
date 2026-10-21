@@ -34,7 +34,7 @@ def main() -> int:
     named_adj = len(load("eval/benchmark/v0/checks/returned/named-decisions.json")["decisions"])
     borderline = len(load("eval/results/closed-book-v0/borderline-decisions.json")["decisions"])
     recheck = len(load("eval/results/closed-book-v0/borderline-recheck.json")["decisions"])
-    pairs = len(load("eval/benchmark/v0/quiz/agreement.json")["pairs"])
+    pairs = load("eval/benchmark/v0/quiz/agreement.json")["pairs"]["total"]
 
     rows = [
         {"task": "pair label (relation and cross-field answer)", "by": "annotators", "n": quiz,
