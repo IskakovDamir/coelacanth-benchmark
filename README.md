@@ -16,7 +16,7 @@ Five paid annotators labelled 136 claim-candidate pairs twice, choosing the rela
 
 ## Paper
 
-[paper/coelacanth-preprint.pdf](paper/coelacanth-preprint.pdf), 19 pages, built on 21 October 2026. The arXiv link will be added after posting.
+A preprint is in preparation; its link will be added here once it is posted.
 
 ## Data
 
